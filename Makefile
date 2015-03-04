@@ -1,7 +1,7 @@
 
 all:
 
-	python3 run/cythonize.py build_ext --build-lib src
+	python3 tool/cythonize.py build_ext --build-lib src
 
 test:
 
