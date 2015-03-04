@@ -13,6 +13,10 @@ will install Numpy and Cython.
   - write readable Python 3
   - test each method with a few doctest
 
+# run it
+
+	./run <arguments>
+
 # test it
 
 The "no output if no error" version.
