@@ -1,4 +1,4 @@
-## GHC 2015
+## GHC 2015 qualification round
 
 # getting started
 
