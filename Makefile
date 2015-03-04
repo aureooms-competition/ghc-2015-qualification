@@ -1,7 +1,7 @@
 
 all:
 
-	python3 run/compile.py build_ext --inplace
+	python3 run/cythonize.py build_ext --build-lib src
 
 test:
 
@@ -13,8 +13,8 @@ testv:
 
 clean:
 
-	rm -f *.c
-	rm -f *.so
+	rm -f src/*.c
+	rm -f src/*.so
 	rm -rf build/
 	rm -rf __pycache__/
 
