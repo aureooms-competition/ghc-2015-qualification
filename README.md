@@ -2,9 +2,11 @@
 
 # getting started
 
+Running
+
 	sudo make boot
 
-will install numpy and cython
+will install Numpy and Cython.
 
 # guidelines
 
@@ -13,11 +15,11 @@ will install numpy and cython
 
 # test it
 
-no output if no error
+The "no output if no error" version.
 
 	make test
 
-or verbose
+The "verbose" version.
 
 	make testv
 
@@ -27,3 +29,9 @@ or verbose
 
 Note that once cythonized `make test` and `make testv` will run tests for both
 the source python code (.py) **and** the compiled share object (.so).
+
+# clean it
+
+Removes all cythonization artifacts.
+
+	make clean
