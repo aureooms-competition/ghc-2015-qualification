@@ -1,8 +1,8 @@
 
-import helloworld
+from .helloworld import helloworld
 
 def main ( ) :
 
-	print( helloworld , hellowolrd.helloworld )
+	print( helloworld )
 
-	helloworld.helloworld( )
+	helloworld( )
