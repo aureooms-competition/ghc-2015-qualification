@@ -16,7 +16,7 @@ clean:
 	rm -f src/*.c
 	rm -f src/*.so
 	rm -rf build/
-	rm -rf __pycache__/
+	rm -rf __pycache__/ src/__pycache__/
 
 boot:
 
