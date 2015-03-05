@@ -1,5 +1,5 @@
 
-from .helloworld import helloworld
+from src.helloworld import helloworld
 
 def main ( ) :
 
