@@ -3,7 +3,7 @@ from .helloworld import helloworld
 
 def main ( ) :
 
-	print( helloworld )
+	print( main , helloworld )
 
 	helloworld( )
 
