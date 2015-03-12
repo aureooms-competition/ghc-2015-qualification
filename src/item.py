@@ -8,7 +8,8 @@ class Server :
 
 class Interval :
 
-	def __init__ ( self , row , size ) :
+	def __init__ ( self , row , start , size ) :
 
 		self.row = row
+		self.start = start
 		self.size = size

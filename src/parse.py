@@ -48,6 +48,7 @@ def all ( tokens ) :
 		while i < S :
 
 			size = 0
+			j = i
 
 			while i < S and row[i] :
 
@@ -56,7 +57,7 @@ def all ( tokens ) :
 
 			if size > 0 :
 
-				intervals.append( item.Interval( r , size ) )
+				intervals.append( item.Interval( r , j , size ) )
 
 			while i < S and not row[i] :
 
