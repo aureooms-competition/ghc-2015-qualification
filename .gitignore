@@ -5,3 +5,5 @@ __pycache__
 *.c
 *.so
 build
+
+*.zip
