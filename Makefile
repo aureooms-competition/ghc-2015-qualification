@@ -23,3 +23,8 @@ boot:
 	pip3 install numpy
 	pip3 install cython
 	pip3 install ecyglpki
+
+zip:
+
+	zip "archive.zip" src/*.py
+	
