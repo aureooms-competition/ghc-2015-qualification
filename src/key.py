@@ -1,4 +1,8 @@
 
+def id ( item ) :
+
+	return item.id
+
 def capacity ( item ) :
 
 	return item.capacity
@@ -10,3 +14,7 @@ def size ( item ) :
 def row ( item ) :
 
 	return item.row
+
+def position ( item ) :
+
+	return item.position

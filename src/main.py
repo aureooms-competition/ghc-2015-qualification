@@ -19,9 +19,8 @@ def main ( ) :
 
 	for interval in intervals :
 
-		print( interval.row , interval.size )
+		print( interval.row , interval.start , interval.size )
 
 	for server in servers :
 
-		print( server.capacity , server.size )
-
+		print( server.id , server.capacity , server.size )
