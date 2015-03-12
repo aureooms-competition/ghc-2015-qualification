@@ -23,7 +23,7 @@ def affect_group_local_search(affectations, R, P):
 	for i in range(len(affectations)):
 		grp = randint(0, P-1)
 		affectations[i].group = grp
-	total = 100000
+	total = 1000000
 	i = 0
 	while i < total:
 		if i % (total/100) == 0:
