@@ -70,7 +70,7 @@ def all ( tokens ) :
 
 		z , c = take( tokens , 2 )
 
-		servers.append( item.Server( c , z ) )
+		servers.append( item.Server( m , c , z ) )
 
 
 	return R , S , U , P , M , intervals , servers

@@ -23,4 +23,4 @@ def main ( ) :
 
 	for server in servers :
 
-		print( server.capacity , server.size )
+		print( server.id , server.capacity , server.size )
