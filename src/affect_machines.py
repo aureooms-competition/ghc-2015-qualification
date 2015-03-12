@@ -2,8 +2,9 @@ from src import key
 from src import item
 from src import eval
 from random import randint
+from random import shuffle
 
-def first_fit(servers, intervals, num_rows):
+def affect(servers, intervals, num_rows):
 	sorted_intervals = sorted(intervals, key=key.row)
 	pos_left = []
 	res = []
@@ -15,8 +16,31 @@ def first_fit(servers, intervals, num_rows):
 			if(pos_left[i] >= s.size):
 				res.append(item.Affectation(s, sorted_intervals[i], sorted_intervals[i].size - pos_left[i]))
 				pos_left[i] -= s.size
-				break 
-	return res
+				break
+	return res;
+
+def scoreAffectations(affectations):
+	score = 0
+	for a in affectations:
+		score+=a.server.capacity
+	return score
+
+def first_fit(servers, intervals, num_rows):
+	best = [];
+	res = [];
+	bestScore = 0
+	score = 0
+	serversBis = servers[:]
+	for i in range(1000):
+		res = affect(serversBis, intervals, num_rows)
+		score = scoreAffectations(res)
+		if score > bestScore:
+			print("number of affectations : ", len(res))
+			best = res
+			bestScore = score
+		serversBis = servers[:]
+		shuffle(serversBis)
+	return best
 
 def affect_group_local_search(affectations, R, P):
 	score = 0
