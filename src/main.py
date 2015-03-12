@@ -2,6 +2,7 @@
 import fileinput
 
 from src import parse
+from src import affect_machines
 
 def main ( ) :
 
@@ -24,3 +25,8 @@ def main ( ) :
 	for server in servers :
 
 		print( server.capacity , server.size )
+
+	print ("result\n\n")
+
+	affectations = affect_machines.first_fit(servers, intervals, R)
+	print ("Servers : ", M, "Affectations :",len(affectations))
