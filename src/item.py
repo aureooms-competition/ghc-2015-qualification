@@ -1,5 +1,6 @@
 
 class Server :
+
 	def __init__ ( self , capacity , size ) :
 
 		self.capacity = capacity
@@ -15,7 +16,10 @@ class Interval :
 
 
 class Affectation :
-	def __init__(self, server, interval, position, group = -1):
-		self.server = server;
-		self.interval = interval;
-		self.group = group;
+
+	def __init__ ( self , server , interval , position , group = -1 ) :
+
+		self.server = server
+		self.interval = interval
+		self.position = position
+		self.group = group
