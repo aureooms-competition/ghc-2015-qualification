@@ -1,4 +1,3 @@
-
 import fileinput
 
 from src import parse
@@ -15,6 +14,7 @@ def main ( ) :
 	print( "R" , R )
 	print( "S" , S )
 	print( "U" , U )
+
 	print( "P" , P )
 	print( "M" , M )
 
@@ -24,8 +24,8 @@ def main ( ) :
 
 	for server in servers :
 
+		print( server.capacity , server.size )
 
-	print( server.capacity , server.size )
 
 	print ("result\n\n")
 
