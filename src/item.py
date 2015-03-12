@@ -1,8 +1,9 @@
 
 class Server :
 
-	def __init__ ( self , capacity , size ) :
+	def __init__ ( self , id , capacity , size ) :
 
+		self.id = id
 		self.capacity = capacity
 		self.size = size
 
@@ -23,3 +24,10 @@ class Affectation :
 		self.interval = interval
 		self.position = position
 		self.group = group
+
+class Capacity :
+
+	def __init__ ( self , total , guaranteed ) :
+
+		self.total = total
+		self.guaranteed = guaranteed

@@ -24,9 +24,13 @@ def main ( ) :
 
 	for server in servers :
 
-		print( server.capacity , server.size )
+
+	print( server.capacity , server.size )
 
 	print ("result\n\n")
 
 	affectations = affect_machines.first_fit(servers, intervals, R)
 	print ("Servers : ", M, "Affectations :",len(affectations))
+
+	print( server.id , server.capacity , server.size )
+

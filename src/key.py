@@ -1,4 +1,8 @@
 
+def id ( item ) :
+
+	return item.id
+
 def capacity ( item ) :
 
 	return item.capacity
