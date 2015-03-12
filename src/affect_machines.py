@@ -19,7 +19,7 @@ def affect(servers, intervals, num_rows):
 				break
 	return res;
 
-def scoreAffectations(affectations):
+def scoreAffectations(affectations, num_rows):
 	score = 0
 	for a in affectations:
 		score+=a.server.capacity
@@ -31,9 +31,9 @@ def first_fit(servers, intervals, num_rows):
 	bestScore = 0
 	score = 0
 	serversBis = servers[:]
-	for i in range(1000):
+	for i in range(3000):
 		res = affect(serversBis, intervals, num_rows)
-		score = scoreAffectations(res)
+		score = scoreAffectations(res, num_rows)
 		if score > bestScore:
 			print("number of affectations : ", len(res))
 			best = res
@@ -47,7 +47,7 @@ def affect_group_local_search(affectations, R, P):
 	for i in range(len(affectations)):
 		grp = randint(0, P-1)
 		affectations[i].group = grp
-	total = 1000000
+	total = 200000
 	i = 0
 	while i < total:
 		if i % (total/100) == 0:
