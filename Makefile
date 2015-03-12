@@ -1,7 +1,7 @@
 
 all:
 
-	python3 tool/cythonize.py build_ext --build-lib src
+	python3 tool/cythonize.py build_ext --build-lib .
 
 test:
 
@@ -27,4 +27,4 @@ boot:
 zip:
 
 	zip "archive.zip" src/*.py
-	
+
