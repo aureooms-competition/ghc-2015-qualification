@@ -4,7 +4,7 @@ from src import parse
 from src import affect_machines
 
 def main ( ) :
-
+	
 	lines = fileinput.input( )
 
 	tokens = parse.tokenize( lines )
