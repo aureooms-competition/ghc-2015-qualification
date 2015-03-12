@@ -2,11 +2,16 @@
 
 # getting started
 
+Make sure you have glpk (lib + header) files installed.
+For example, on Ubuntu
+
+	sudo apt-get install libglpk36 libglpk-dev
+
 Running
 
 	sudo make boot
 
-will install Numpy and Cython.
+will install Numpy, Cython and ecyglpki.
 
 # guidelines
 
