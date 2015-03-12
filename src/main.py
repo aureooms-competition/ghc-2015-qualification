@@ -31,5 +31,7 @@ def main ( ) :
 
 	affectations = affect_machines.first_fit(servers, intervals, R)
 	print ("Servers : ", M, "Affectations :",len(affectations))
+
+	final_res = affect_machines.affect_group_local_search(affectations, R, P)
 	print( server.id , server.capacity , server.size )
 
