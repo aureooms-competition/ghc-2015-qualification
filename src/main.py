@@ -4,7 +4,7 @@ import fileinput
 from src import parse
 
 def main ( ) :
-
+	
 	lines = fileinput.input( )
 
 	tokens = parse.tokenize( lines )
@@ -24,3 +24,4 @@ def main ( ) :
 	for server in servers :
 
 		print( server.capacity , server.size )
+
