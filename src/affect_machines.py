@@ -1,5 +1,6 @@
 from src import key
 from src import item
+from random import randint
 
 def first_fit(servers, intervals, num_rows):
 	sorted_intervals = sorted(intervals, key=key.row)
@@ -15,4 +16,18 @@ def first_fit(servers, intervals, num_rows):
 				pos_left[i] -= s.size
 				break 
 	return res
+
+def affect_group_local_search(affectations, nbr_groups):
+	score = 0
+	for i in range(10000):
+		aff = randint(0, len(affectations)-1)
+		grp = randint(0, nbr_groups-1)
+		old = affectations[var].group
+		affectations[aff].group = grp
+		# test
+		if res >= score:
+			score = res
+		else:
+			affectations[aff].group = old
+	return affectations
 

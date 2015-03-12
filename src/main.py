@@ -31,6 +31,5 @@ def main ( ) :
 
 	affectations = affect_machines.first_fit(servers, intervals, R)
 	print ("Servers : ", M, "Affectations :",len(affectations))
-
 	print( server.id , server.capacity , server.size )
 
