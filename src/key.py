@@ -3,6 +3,10 @@ def id ( item ) :
 
 	return item.id
 
+def serverid ( item ) :
+
+	return item.server.id
+
 def capacity ( item ) :
 
 	return item.capacity

@@ -2,16 +2,14 @@
 from src import key
 
 
-def writeFile( M , affectations ) :
+def write( M , affectations , objective ) :
 	'''server, interval, position, group'''
 
 	if not M : return
 
-	f = open( 'out/out' , 'w' )
-	
-	affectations = sorted( affectations , key = key.id )
+	affectations = sorted( affectations , key = key.serverid )
 
-	with open( 'out/out' , 'w' ) :
+	with open( 'out/%d' % objective  , 'w' ) as f :
 
 		j = 0
 
@@ -21,12 +19,13 @@ def writeFile( M , affectations ) :
 
 				affectation = affectations[j]
 
-				if affectation.id == i :
+				if affectation.server.id == i :
 
 					pos = affectation.position + affectation.interval.start
 					row = affectation.interval.row
+					group = affectation.group
 
-					line = "{} {} {}\n".format(i, pos, row)
+					line = "{} {} {}\n".format( row , pos , group )
 					j += 1
 
 				else : line = 'x\n'

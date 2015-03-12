@@ -2,9 +2,10 @@ import fileinput
 
 from src import parse
 from src import affect_machines
+from src import eval , out
 
 def main ( ) :
-	
+
 	lines = fileinput.input( )
 
 	tokens = parse.tokenize( lines )
@@ -34,4 +35,8 @@ def main ( ) :
 
 	final_res = affect_machines.affect_group_local_search(affectations, R, P)
 	print( server.id , server.capacity , server.size )
+
+	objective = eval.all( R , P , final_res  )
+
+	out.write( M , final_res , objective )
 
