@@ -26,5 +26,5 @@ boot:
 
 zip:
 
-	zip "archive.zip" src/*.py
+	zip "code.zip" run src/*.py
 
