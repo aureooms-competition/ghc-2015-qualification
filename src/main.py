@@ -1,7 +1,7 @@
 import fileinput
 import argparse
 
-from src import fd , parse , solver , eval , out
+from src import fd , parse , allocate , solver , eval , out
 
 def main ( ) :
 
@@ -26,7 +26,11 @@ def main ( ) :
 
 	# solve
 
-	affectations = solver.firstfit( servers , intervals , iterations = args.firstfit )
+	# affectations = solver.firstfit( servers , intervals , iterations = args.firstfit )
+
+	servers = sorted( servers , key = lambda x : x.capacity / x.size , reverse = True )
+
+	affectations = allocate.roundrobin( R , servers , intervals )
 
 	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
