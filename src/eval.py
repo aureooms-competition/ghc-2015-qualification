@@ -1,7 +1,9 @@
 
-from src import item
+def objective( groups , rows ) :
 
-def all ( R , P , affectations ) :
+	return min( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
+
+def tableau ( R , P , affectations ) :
 
 	groups = [ 0 for i in range( P ) ]
 
@@ -17,4 +19,12 @@ def all ( R , P , affectations ) :
 
 		rows[i.row][g] += s.capacity
 
-	return min( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
+	return groups , rows
+
+
+def all ( R , P , affectations ) :
+
+	groups , rows = tableau( R , P , affectations )
+
+	return objective( groups , rows )
+
