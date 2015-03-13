@@ -1,22 +1,35 @@
 import fileinput
+import argparse
 
-from src import parse
-from src import solver
-from src import eval , out
+from src import fd , parse , solver , eval , out
 
 def main ( ) :
 
-	lines = fileinput.input( )
+	# parse args
 
-	tokens = parse.tokenize( lines )
+	parser = argparse.ArgumentParser( )
+	parser.add_argument( "input" , help = "input file" , type = str )
+	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
+	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
+	args = parser.parse_args( )
 
-	R , S , U , P , M , intervals , servers = parse.all( tokens )
+	# parse problem
 
-	affectations = solver.firstfit( servers , intervals , iterations = 100 )
+	with open( args.input ) as f :
+
+		lines = fd.lines( f )
+
+		tokens = parse.tokenize( lines )
+
+		R , S , U , P , M , intervals , servers = parse.all( tokens )
+
+	# solve
+
+	affectations = solver.firstfit( servers , intervals , iterations = args.firstfit )
 
 	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
-	affectations , objective = solver.localsearch( R , P , affectations , iterations = 100 )
+	affectations , objective = solver.localsearch( R , P , affectations , iterations = args.localsearch )
 
 	print( "Final score : %d" % objective )
 
