@@ -11,6 +11,7 @@ def main ( ) :
 	parser.add_argument( "input" , help = "input file" , type = str )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
+	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
 	args = parser.parse_args( )
 
 	# parse problem
@@ -29,9 +30,10 @@ def main ( ) :
 
 	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
-	affectations , objective = solver.localsearch( R , P , affectations , iterations = args.localsearch )
+	affectations , objective = solver.localsearch( R , P , affectations , iterations = args.localsearch , swaps = args.swaps )
 
 	print( "Final score : %d" % objective )
+	print( "Final score : %d" % eval.all( R , P , affectations ) )
 
 	out.write( M , affectations , objective )
 

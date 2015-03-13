@@ -1,7 +1,8 @@
 from src import key
 from src import eval
-from random import randint
-from random import shuffle
+from random import randint , shuffle
+
+import random
 
 from src.item import Affectation
 
@@ -41,7 +42,6 @@ def firstfit ( servers , intervals , iterations = 1 ) :
 	bestScore = 0
 	score = 0
 
-
 	for i in range( iterations ) :
 
 		shuffle( servers )
@@ -57,35 +57,44 @@ def firstfit ( servers , intervals , iterations = 1 ) :
 
 	return best
 
-def localsearch ( R , P , affectations , iterations = 1 ) :
+def localsearch ( R , P , affectations , iterations = 1 , swaps = 2 ) :
 
 	A = len( affectations )
 
-	best = 0
+	swaps = min( swaps , A )
 
 	for affectation in affectations :
 
-		group = randint( 0 , P - 1 )
-		affectation.group = group
+		affectation.group = randint( 0 , P - 1 )
+
+	groups , rows = eval.tableau(  R , P , affectations )
+
+	best = eval.objective( groups , rows )
 
 	for i in range( iterations ) :
 
 		if iterations >= 100 and not i % ( iterations // 100 ) :
 			print( "%3d%%   score = %d" % ( 100 * i / iterations , best ) )
 
-		aff1 = randint( 0 , A - 1 )
-		aff2 = randint( 0 , A - 1 )
+		sample = random.sample( affectations , swaps )
 
-		grp1 = randint( 0 , P - 1 )
-		grp2 = randint( 0 , P - 1 )
+		grps = [ randint( 0 , P - 1 ) for affectation in sample ]
 
-		old1 = affectations[aff1].group
-		old2 = affectations[aff2].group
+		olds = [ affectation.group for affectation in sample ]
 
-		affectations[aff1].group = grp1
-		affectations[aff2].group = grp2
+		for affectation , grp , old in zip( sample , grps , olds ) :
 
-		objective = eval.all( R , P , affectations )
+			affectation.group = grp
+
+			capacity = affectation.server.capacity
+
+			groups[old] -= capacity
+			groups[grp] += capacity
+
+			rows[affectation.interval.row][old] -= capacity
+			rows[affectation.interval.row][grp] += capacity
+
+		objective = eval.objective( groups , rows )
 
 		if objective >= best :
 
@@ -93,7 +102,16 @@ def localsearch ( R , P , affectations , iterations = 1 ) :
 
 		else :
 
-			affectations[aff1].group = old1
-			affectations[aff2].group = old2
+			for affectation , grp , old in zip( sample , grps , olds ) :
+
+				affectation.group = old
+
+				capacity = affectation.server.capacity
+
+				groups[old] += capacity
+				groups[grp] -= capacity
+
+				rows[affectation.interval.row][old] += capacity
+				rows[affectation.interval.row][grp] -= capacity
 
 	return affectations , best
