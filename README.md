@@ -20,7 +20,7 @@ will install Numpy, Cython and ecyglpki.
 
 # run it
 
-	./run <arguments>
+	./run in/dc.in -f 3000 -l 200000 -s 2
 
 # test it
 
