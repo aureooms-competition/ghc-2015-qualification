@@ -1,36 +1,42 @@
 
 from src import key
 
-
-def write( M , affectations , objective ) :
-	'''server, interval, position, group'''
+def write ( M , affectations , objective ) :
 
 	if not M : return
 
 	affectations = sorted( affectations , key = key.serverid )
 
-	with open( 'out/%d' % objective  , 'w' ) as f :
+	with open( "out/%d" % objective  , "w" ) as f :
 
 		j = 0
+		A = len( affectations )
+
+		fmt = "%d %d %d\n"
+		notused = "x\n"
 
 		for i in range( M ) :
 
-			if j < len( affectations ) :
+			if j >= A : break
 
-				affectation = affectations[j]
+			affectation = affectations[j]
 
-				if affectation.server.id == i :
+			if affectation.server.id == i :
 
-					pos = affectation.position + affectation.interval.start
-					row = affectation.interval.row
-					group = affectation.group
+				position = affectation.interval.start + affectation.position
+				row = affectation.interval.row
+				group = affectation.group
 
-					line = "{} {} {}\n".format( row , pos , group )
-					j += 1
+				line = fmt % ( row , position , group )
+				j += 1
 
-				else : line = 'x\n'
-
-			else : line = 'x\n'
+			else : line = notused
 
 			f.write( line )
+
+
+		while i < M :
+
+			f.write( notused )
+			i += 1
 
