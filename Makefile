@@ -26,5 +26,5 @@ boot:
 
 zip:
 
-	zip "code.zip" run src/*.py
+	zip "code.zip" solve validate src/*.py
 
