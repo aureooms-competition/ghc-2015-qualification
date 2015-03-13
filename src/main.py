@@ -6,63 +6,55 @@ from src import fd , action , parse , out , file
 
 from src.ascii import valid , warning , error
 
-from src import init , allocate , solver
+from src import init , allocate , solver , eval
 
-from src import pivoting , walk , eval , apply
+from src import pivoting , neighborhood
 
 from src.item import Solution
 
-FIRSTFIT = "firstfit"
-ROUNDROBIN = "roundrobin"
 
+def firstfit ( args , problem ) :
 
-def firstfit (  args , problem ) :
-
-	R , S , U , P , M , intervals , servers , rows = problem
-
-	return solver.firstfit( servers , intervals , iterations = args.firstfit )
+	return solver.firstfit( problem.servers , problem.intervals , iterations = args.firstfit )
 
 
 def roundrobin ( args , problem ) :
 
-	R , S , U , P , M , intervals , servers , rows = problem
+	servers = sorted( problem.servers , key = lambda x : x.capacity / x.size , reverse = True )
 
-	servers = sorted( servers , key = lambda x : x.capacity / x.size , reverse = True )
+	tourniquet = allocate.maketourniquet( problem.R , problem.intervals )
 
-	tourniquet = allocate.maketourniquet( R , intervals )
+	affectations = [ [ ] for interval in problem.intervals ]
 
-	affectations = [ [ ] for interval in intervals ]
+	available = [ interval.size for interval in problem.intervals ]
 
-	available = [ interval.size for interval in intervals ]
+	recycled = allocate.roundrobin( problem.R , servers , tourniquet , available , affectations )
 
-	recycled = allocate.roundrobin( R , servers , tourniquet , available , affectations )
-
-	if args.recycle : allocate.recycle( R , recycled , tourniquet , available , affectations )
+	if args.recycle : allocate.recycle( problem.R , recycled , tourniquet , available , affectations )
 
 	return sum( affectations , [ ] )
 
-LOCALSEARCH = "localsearch"
-II = "ii"
+def localsearch ( args , problem , solution ) :
 
-def localsearch ( args , problem , solution  ) :
-
-	R , S , U , P , M , intervals , servers , rows = problem
-
-	return solver.localsearch( R , P , solution , iterations = args.localsearch , swaps = args.swaps )
+	return solver.localsearch( problem.R , problem.P , solution , iterations = args.localsearch , swaps = args.swaps )
 
 def ii ( args , problem , solution ) :
 
-	R , S , U , P , M , intervals , servers , rows = problem
-
 	return solver.ii(
 		solution ,
-		pivoting.firstoreq ,
-		walk.RandomGroupChange( P ) ,
-		eval.groupchange ,
-		apply.groupchange
+		args.pivoting ,
+		args.neighborhood.Walk( problem ) ,
+		args.neighborhood.Eval( problem ) ,
+		args.neighborhood.Apply( problem )
 	)
 
+FIRSTFIT = "firstfit"
+ROUNDROBIN = "roundrobin"
+
 ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin }
+
+LOCALSEARCH = "ls"
+II = "ii"
 
 ALGORITHMS = { LOCALSEARCH : localsearch , II : ii }
 
@@ -77,14 +69,20 @@ def solve ( ) :
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
-	parser.add_argument( "-A" , "--algorithm" , help = "# algorithm" , type = str , choices = ALGORITHMS , required = True , action = action.Dict )
+	parser.add_argument( "-A" , "--algorithm" , help = "algorithm" , type = str , choices = ALGORITHMS , required = True , action = action.Dict )
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
+	parser.add_argument( "-p" , "--pivoting" , help = "pivoting algorithm" , type = str , choices = pivoting.DICT , action = action.Dict )
+	parser.add_argument( "-n" , "--neighborhood" , help = "neighborhood" , type = str , choices = neighborhood.DICT , action = action.Dict )
 	args = parser.parse_args( )
 
 	# parse problem
 
 	problem = file.read( args.input , parse.tokenize , parse.problem )
-	R , S , U , P , M , intervals , servers , rows = problem
+
+	R = problem.R
+	S = problem.S
+	P = problem.P
+	M = problem.M
 
 	# initial solution
 
@@ -103,11 +101,11 @@ def solve ( ) :
 
 	# create evaluation tableau and solution state
 
-	grps , rws = eval.tableau( R , P , affectations )
+	groups , rows = eval.tableau( R , P , affectations )
 
-	objective = eval.objective( grps , rws )
+	objective = eval.objective( groups , rows )
 
-	solution = Solution( affectations , grps , rws , objective )
+	solution = Solution( affectations , groups , rows , objective )
 
 	# solve
 
@@ -136,7 +134,11 @@ def validate ( ) :
 	# parse problem
 
 	problem = file.read( args.input , parse.tokenize , parse.problem )
-	R , S , U , P , M , intervals , servers , rows = problem
+
+	R = problem.R
+	S = problem.S
+	P = problem.P
+	M = problem.M
 
 	# validate solutions
 
@@ -178,7 +180,7 @@ def validate ( ) :
 
 				error( "[INFEASIBLE] Server %d used %d times" % ( i , used ) )
 
-		for r , row , urow in zip( range( R ) , rows , slotsused ) :
+		for r , row , urow in zip( range( R ) , problem.rows , slotsused ) :
 
 			for i , available , used in zip( range( S ) , row , urow ) :
 

@@ -37,6 +37,20 @@ class Affectation ( object ) :
 		return "A %(server)s %(interval)s %(position)s %(group)s" % self.__dict__
 
 
+class Problem ( object ) :
+
+	def __init__ ( self , R , S , U , P , M , intervals , servers , rows ) :
+
+		self.R = R
+		self.S = S
+		self.U = U
+		self.P = P
+		self.M = M
+		self.intervals = intervals
+		self.servers = servers
+		self.rows = rows
+
+
 class Solution ( object ) :
 
 	def __init__ ( self , affectations , groups , rows , objective ) :
@@ -45,3 +59,5 @@ class Solution ( object ) :
 		self.groups = groups
 		self.rows = rows
 		self.objective = objective
+
+

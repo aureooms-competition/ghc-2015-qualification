@@ -1,4 +1,4 @@
-from src.item import Interval , Server , Affectation
+from src.item import Interval , Server , Affectation , Problem
 
 def tokenize ( lines ) :
 
@@ -77,7 +77,7 @@ def problem ( tokens ) :
 		servers.append( server )
 
 
-	return R , S , U , P , M , intervals , servers , rows
+	return Problem( R , S , U , P , M , intervals , servers , rows )
 
 
 def affectations ( lines ) :
@@ -97,7 +97,12 @@ def solution ( tuples , problem = None ) :
 
 	affectations = [ ]
 
-	R , S , U , P , M , intervals , servers , _ = problem
+	R = problem.R
+	S = problem.S
+	P = problem.P
+	M = problem.M
+	intervals = problem.intervals
+	servers = problem.servers
 
 	rows = [ [ ] for i in range ( R ) ]
 

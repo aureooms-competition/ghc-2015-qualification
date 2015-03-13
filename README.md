@@ -20,8 +20,12 @@ will install Numpy, Cython and ecyglpki.
 
 # run it
 
-	./solve in/dc.in -a roundrobin -l 200000 -s 2
-	./solve in/dc.in -a firstfit -f 3000 -l 200000 -s 2
+	./solve in/dc.in -a firstfit -f 3000 -A ls -l 200000 -s 2
+	./solve in/dc.in -a firstfit -f 3000 -A ls -l 200000 -s 1
+	./solve in/dc.in -a roundrobin    -A ls -l 200000 -s 1
+	./solve in/dc.in -a roundrobin -r -A ls -l 200000 -s 1
+	./solve in/dc.in -a roundrobin -r -A ii -n sgc -p best
+	./solve in/dc.in -a roundrobin -r -A ii -n rgc -p firstandeq
 
 # validate it
 
