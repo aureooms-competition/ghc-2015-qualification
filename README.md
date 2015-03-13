@@ -20,7 +20,11 @@ will install Numpy, Cython and ecyglpki.
 
 # run it
 
-	./run in/dc.in -f 3000 -l 200000 -s 2
+	./solve in/dc.in -f 3000 -l 200000 -s 2
+
+# validate it
+
+	./validate in/dc.in out/*
 
 # test it
 
