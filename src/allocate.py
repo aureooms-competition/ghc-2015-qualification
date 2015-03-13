@@ -39,7 +39,8 @@ class Tourniquet :
 
 		return next( self.pools[self.current] )
 
-def roundrobin ( R , servers , intervals ) :
+
+def maketourniquet ( R , intervals ) :
 
 	tourniquet = Tourniquet( R )
 
@@ -47,18 +48,10 @@ def roundrobin ( R , servers , intervals ) :
 
 		tourniquet[interval.row].add( ( i , interval ) )
 
-	affectations = []
+	return tourniquet
 
-	available = [ interval.size for interval in intervals ]
-	affectations = [ [ ] for interval in intervals ]
 
-	#	changed = True
-	#
-	#	while changed :
-	#
-	#		changed = False
-	#
-	#		replaced = [ ]
+def roundrobin ( R , servers , tourniquet , available , affectations ) :
 
 	recycled = [ ]
 
@@ -77,13 +70,17 @@ def roundrobin ( R , servers , intervals ) :
 
 		else : recycled.append( server )
 
+	return recycled
+
+def recycle ( R , recycled , tourniquet , available , affectations ) :
+
 	changed = True
 
 	while changed :
 
 		changed = False
 
-		server = recycled
+		servers = recycled
 
 		recycled = [ ]
 
@@ -120,6 +117,5 @@ def roundrobin ( R , servers , intervals ) :
 
 			else : recycled.append( server )
 
-
-	return sum( affectations , [ ] )
+	return recycled
 

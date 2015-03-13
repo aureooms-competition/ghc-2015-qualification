@@ -7,15 +7,28 @@ from src import fd , parse , allocate , solver , eval , out , file
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
 
+
 def firstfit (  args , R , S , U , P , M , intervals , servers , rows ) :
 
 	return solver.firstfit( servers , intervals , iterations = args.firstfit )
+
 
 def roundrobin ( args , R , S , U , P , M , intervals , servers , rows ) :
 
 	servers = sorted( servers , key = lambda x : x.capacity / x.size , reverse = True )
 
-	return allocate.roundrobin( R , servers , intervals )
+	tourniquet = allocate.maketourniquet( R , intervals )
+
+	affectations = [ [ ] for interval in intervals ]
+
+	available = [ interval.size for interval in intervals ]
+
+	recycled = allocate.roundrobin( R , servers , tourniquet , available , affectations )
+
+	allocate.recycle( R , recycled , tourniquet , available , affectations )
+
+	return sum( affectations , [ ] )
+
 
 ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin }
 
