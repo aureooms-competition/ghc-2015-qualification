@@ -38,6 +38,7 @@ def solve ( ) :
 
 	parser = argparse.ArgumentParser( )
 	parser.add_argument( "input" , help = "input file" , type = str )
+	parser.add_argument( "--solution" , help = "existing solution to optimize" , type = str )
 	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , required = True )
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
@@ -50,13 +51,22 @@ def solve ( ) :
 	problem = file.read( args.input , parse.tokenize , parse.problem )
 	R , S , U , P , M , intervals , servers , rows = problem
 
+	# initial solution
+
+	if args.solution is None :
+
+		affectations = ALLOCATORS[args.allocator]( args , R , S , U , P , M , intervals , servers , rows )
+
+		print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
+
+		init.random( P , affectations )
+
+	else :
+
+		additional = ( None , { "problem" : problem } )
+		affectations = file.read( args.solution , parse.affectations , parse.solution , additional = additional )
+
 	# solve
-
-	affectations = ALLOCATORS[args.allocator]( args , R , S , U , P , M , intervals , servers , rows )
-
-	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
-
-	init.random( P , affectations )
 
 	affectations , objective = solver.localsearch( R , P , affectations , iterations = args.localsearch , swaps = args.swaps )
 
