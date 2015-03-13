@@ -92,3 +92,12 @@ def validate ( ) :
 
 				print( "[INFEASIBLE] Server %d used %d times" % ( i , used ) )
 
+		for r , row , urow in zip( range( R ) , rows , slotsused ) :
+
+			for i , available , used in zip( range( S ) , row , urow ) :
+
+				authorized = 1 if available else 0
+
+				if used > authorized :
+
+					print( "[INFEASIBLE] Row %d , slot %d , used %d > %d times" % ( r , i , used , authorized ) )
