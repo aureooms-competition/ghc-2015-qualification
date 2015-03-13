@@ -1,7 +1,7 @@
 import fileinput
 
 from src import parse
-from src import affect_machines
+from src import solver
 from src import eval , out
 
 def main ( ) :
@@ -12,29 +12,12 @@ def main ( ) :
 
 	R , S , U , P , M , intervals , servers = parse.all( tokens )
 
-	print( "R" , R )
-	print( "S" , S )
-	print( "U" , U )
-
-	print( "P" , P )
-	print( "M" , M )
-
-	for interval in intervals :
-
-		print( interval.row , interval.start , interval.size )
-
-	for server in servers :
-
-		print( server.capacity , server.size )
-
-
 	print ("result\n\n")
 
-	affectations = affect_machines.first_fit(servers, intervals)
+	affectations = solver.first_fit( servers , intervals , iterations = 1 )
 	print ("Servers : ", M, "Affectations :",len(affectations))
 
-	final_res = affect_machines.affect_group_local_search(affectations, R, P)
-	print( server.id , server.capacity , server.size )
+	final_res = solver.affect_group_local_search(affectations, R, P)
 
 	objective = eval.all( R , P , final_res  )
 

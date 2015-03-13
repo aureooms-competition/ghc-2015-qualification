@@ -15,7 +15,7 @@ def affect ( servers , intervals ) :
 
 	available = [ interval.size for interval in intervals ]
 
-	for server in reversed( servers ) :
+	for server in servers :
 
 		for i , interval in enumerate( intervals ) :
 
@@ -34,21 +34,25 @@ def scoreAffectations( affectations ) :
 	return sum( affectation.server.capacity for affectation in affectations )
 
 
-def first_fit(servers, intervals):
-	best = [];
-	res = [];
+def first_fit( servers , intervals , iterations = 1 ) :
+
+	best = []
+	res = []
+
 	bestScore = 0
 	score = 0
-	serversBis = servers[:]
-	for i in range(3000):
-		res = affect(serversBis, intervals)
+
+	shuffle( servers )
+
+	for i in range( iterations ) :
+
+		res = affect(servers, intervals)
 		score = scoreAffectations(res)
 		if score > bestScore:
 			print("number of affectations : ", len(res))
 			best = res
 			bestScore = score
-		serversBis = servers[:]
-		shuffle(serversBis)
+
 	return best
 
 def affect_group_local_search(affectations, R, P):
