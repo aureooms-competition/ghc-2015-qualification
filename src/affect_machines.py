@@ -4,36 +4,44 @@ from src import eval
 from random import randint
 from random import shuffle
 
-def affect(servers, intervals, num_rows):
-	sorted_intervals = sorted(intervals, key=key.row)
-	pos_left = []
-	res = []
-	for i in sorted_intervals :
-		pos_left.append(i.size)
-	while len(servers) > 0:
-		s = servers.pop()
-		for i in range(len(sorted_intervals)):
-			if(pos_left[i] >= s.size):
-				res.append(item.Affectation(s, sorted_intervals[i], sorted_intervals[i].size - pos_left[i]))
-				pos_left[i] -= s.size
-				break
-	return res;
+from src.item import Affectation
 
-def scoreAffectations(affectations, num_rows):
+def affect ( servers , intervals ) :
+
+	intervals = sorted( intervals , key = key.row )
+
+	affectations = []
+
+	available = [ interval.size for interval in intervals ]
+
+	for server in reversed( servers ) :
+
+		for i , interval in enumerate( intervals ) :
+
+			if available[i] >= server.size :
+
+				available[i] -= server.size
+				affectation = Affectation( server , interval , available[i] )
+				affectations.append( affectation )
+				break
+
+	return affectations
+
+def scoreAffectations(affectations):
 	score = 0
 	for a in affectations:
 		score+=a.server.capacity
 	return score
 
-def first_fit(servers, intervals, num_rows):
+def first_fit(servers, intervals):
 	best = [];
 	res = [];
 	bestScore = 0
 	score = 0
 	serversBis = servers[:]
 	for i in range(3000):
-		res = affect(serversBis, intervals, num_rows)
-		score = scoreAffectations(res, num_rows)
+		res = affect(serversBis, intervals)
+		score = scoreAffectations(res)
 		if score > bestScore:
 			print("number of affectations : ", len(res))
 			best = res
