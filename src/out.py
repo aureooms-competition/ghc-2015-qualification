@@ -1,5 +1,9 @@
 
+import os , os.path
+
 from src import key
+
+OUT = "out"
 
 MAGIC = 982451653
 
@@ -22,6 +26,19 @@ def blueprint ( R , S , P , affectations ) :
 	return hash
 
 
+def objective ( solution ) :
+
+	int( os.path.basename( solution.split( "-" )[0] ) )
+
+
+def improves ( objective ) :
+
+	best = max( os.listdir( OUT ) , key = objective )
+
+	return objective > best
+
+
+
 def write ( R , S , P , M , affectations , objective ) :
 
 	if not M : return
@@ -30,7 +47,7 @@ def write ( R , S , P , M , affectations , objective ) :
 
 	hash = blueprint( R , S , P , affectations )
 
-	with open( "out/{0}-{1:x}".format( objective , hash )  , "w" ) as f :
+	with open( "{0}/{1}-{2:x}".format( OUT , objective , hash )  , "w" ) as f :
 
 		j = 0
 		A = len( affectations )

@@ -109,9 +109,19 @@ def solve ( ) :
 
 	# solve
 
+	best = solution.objective
+
 	for _ in args.algorithm( args , problem , solution ) :
 
-		print( solution.objective )
+		if solution.objective > best :
+
+			best = solution.objective
+
+			if out.improves( best ) :
+
+				out.write( R , S , P , M , affectations , best )
+
+			print( best )
 
 	affectations = solution.affectations
 	objective = solution.objective
@@ -144,11 +154,9 @@ def validate ( ) :
 
 	additional = ( None , { "problem" : problem } )
 
-	name = lambda solution : int( os.path.basename( solution.split( "-" )[0] ) )
+	for solution in sorted( args.solutions , key = out.objective ) :
 
-	for solution in sorted( args.solutions , key = name ) :
-
-		expected = name( solution )
+		expected = out.objective( solution )
 
 		affectations = file.read( solution , parse.affectations , parse.solution , additional = additional )
 
