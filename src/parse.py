@@ -1,4 +1,4 @@
-from src import item
+from src.item import Interval , Server
 
 def tokenize ( lines ) :
 
@@ -27,13 +27,13 @@ def all ( tokens ) :
 
 	rows = [ [ True ] * S for i in range( R ) ]
 
-	servers = []
+	servers = [ ]
 
-	intervals = []
+	intervals = [ ]
 
 	for i in range( U ) :
 
-		# pour chaque emplacement non disponible
+		# for each non available emplacement
 
 		r , s = take( tokens , 2 )
 
@@ -57,7 +57,9 @@ def all ( tokens ) :
 
 			if size > 0 :
 
-				intervals.append( item.Interval( r , j , size ) )
+				interval = Interval( r , j , size )
+
+				intervals.append( interval )
 
 			while i < S and not row[i] :
 
@@ -66,11 +68,13 @@ def all ( tokens ) :
 
 	for m in range( M ) :
 
-		# pour chaque serveur
+		# for each server
 
 		z , c = take( tokens , 2 )
 
-		servers.append( item.Server( m , c , z ) )
+		server = Server( m , c , z )
+
+		servers.append( server )
 
 
 	return R , S , U , P , M , intervals , servers
