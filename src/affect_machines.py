@@ -6,6 +6,7 @@ from random import shuffle
 
 from src.item import Affectation
 
+
 def affect ( servers , intervals ) :
 
 	intervals = sorted( intervals , key = key.row )
@@ -27,11 +28,11 @@ def affect ( servers , intervals ) :
 
 	return affectations
 
-def scoreAffectations(affectations):
-	score = 0
-	for a in affectations:
-		score+=a.server.capacity
-	return score
+
+def scoreAffectations( affectations ) :
+
+	return sum( affectation.server.capacity for affectation in affectations )
+
 
 def first_fit(servers, intervals):
 	best = [];
