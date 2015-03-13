@@ -33,10 +33,9 @@ def objective ( solution ) :
 
 def improves ( obj ) :
 
-	best = int( max( os.listdir( OUT ) , key = objective ) )
+	solutions = ( objective( solution ) for solution in os.listdir( OUT ) )
 
-	return obj > best
-
+	return obj > max( solutions )
 
 
 def write ( R , S , P , M , affectations , objective ) :
