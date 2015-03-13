@@ -1,9 +1,10 @@
 import fileinput
 import argparse
+import os.path
 
-from src import fd , parse , allocate , solver , eval , out
+from src import fd , parse , allocate , solver , eval , out , file
 
-def main ( ) :
+def solve ( ) :
 
 	# parse args
 
@@ -16,13 +17,8 @@ def main ( ) :
 
 	# parse problem
 
-	with open( args.input ) as f :
-
-		lines = fd.lines( f )
-
-		tokens = parse.tokenize( lines )
-
-		R , S , U , P , M , intervals , servers = parse.all( tokens )
+	problem = file.read( args.input , parse.tokenize , parse.problem )
+	R , S , U , P , M , intervals , servers = problem
 
 	# solve
 
@@ -41,3 +37,31 @@ def main ( ) :
 
 	out.write( M , affectations , objective )
 
+
+def validate ( ) :
+
+	# parse args
+
+	parser = argparse.ArgumentParser( )
+	parser.add_argument( "input" , help = "input file" , type = str )
+	parser.add_argument( "solutions" , help = "solution files" , type = str , nargs = "+" )
+	args = parser.parse_args( )
+
+	# parse problem
+
+	problem = file.read( args.input , parse.tokenize , parse.problem )
+	R , S , U , P , M , intervals , servers = problem
+
+	# validate solutions
+
+	additional = ( None , { "problem" : problem } )
+
+	for solution in args.solutions :
+
+		expected = int( os.path.basename( solution ) )
+
+		affectations = file.read( solution , parse.affectations , parse.solution , additional = additional )
+
+		objective = eval.all( R , P , affectations )
+
+		print( objective == expected , solution , objective )

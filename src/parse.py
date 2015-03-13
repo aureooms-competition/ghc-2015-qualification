@@ -1,4 +1,4 @@
-from src.item import Interval , Server
+from src.item import Interval , Server , Affectation
 
 def tokenize ( lines ) :
 
@@ -21,7 +21,7 @@ def header ( tokens ) :
 	return take( tokens , 5 )
 
 
-def all ( tokens ) :
+def problem ( tokens ) :
 
 	R , S , U , P , M = header( tokens )
 
@@ -80,3 +80,73 @@ def all ( tokens ) :
 	return R , S , U , P , M , intervals , servers
 
 
+def affectations ( lines ) :
+
+	for line in lines :
+
+		tokens = line.split( )
+
+		if len( tokens ) != 3 : yield tuple( tokens )
+
+		else : yield tuple( map( int , tokens ) )
+
+
+def solution ( tuples , problem = None ) :
+
+	if problem is None : raise Exception( "cannot parse solution without problem" )
+
+	affectations = [ ]
+
+	R , S , U , P , M , intervals , servers = problem
+
+	rows = [ [ ] for i in range ( R ) ]
+
+	for interval in intervals :
+
+		rows[interval.row].append( interval )
+
+	skip = ( 'x' , )
+
+	tuples = list( tuples )
+
+	if len( tuples ) != M :
+
+		raise Exception( "The number of lines of a solution should be M. Expected %d, received %d" % ( M , len( tuples ) ) )
+
+	for i , values in enumerate( tuples ) :
+
+		if values == skip : continue
+
+		if len( values ) != 3 :
+
+			raise Exception( "each line of a solution should contain 3 integers" )
+
+		r , position , group = values
+
+		if not 0 <= r < R :
+
+			raise Exception( "invalid row" )
+
+		if not 0 <= group < P :
+
+			raise Exception( "invalid group" )
+
+		row = rows[r]
+
+		interval = next( ( interval for interval in row if interval.start <= position < interval.start + interval.size ) , None )
+
+		if interval is None :
+
+			raise Exception( "could not find interval" )
+
+		server = next( ( server for server in servers if server.id == i ) , None )
+
+		if server is None :
+
+			raise Exception( "could not find server" )
+
+		affectation = Affectation( server , interval , position , group )
+
+		affectations.append( affectation )
+
+	return affectations
