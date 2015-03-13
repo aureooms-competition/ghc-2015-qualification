@@ -1,13 +1,36 @@
 
 from src import key
 
-def write ( M , affectations , objective ) :
+MAGIC = 982451653
+
+def blueprint ( R , S , P , affectations ) :
+
+	hash = 0
+
+	for affectation in affectations :
+
+		hash *= S
+		hash += affectation.interval.start + affectation.position
+		hash %= MAGIC
+		hash *= R
+		hash += affectation.interval.row
+		hash %= MAGIC
+		hash *= P
+		hash += affectation.group
+		hash %= MAGIC
+
+	return hash
+
+
+def write ( R , S , P , M , affectations , objective ) :
 
 	if not M : return
 
 	affectations = sorted( affectations , key = key.serverid )
 
-	with open( "out/%d" % objective  , "w" ) as f :
+	hash = blueprint( R , S , P , affectations )
+
+	with open( "out/{0}-{1:x}".format( objective , hash )  , "w" ) as f :
 
 		j = 0
 		A = len( affectations )

@@ -73,7 +73,7 @@ def solve ( ) :
 	print( "Final score : %d" % objective )
 	print( "Final score : %d" % eval.all( R , P , affectations ) )
 
-	out.write( M , affectations , objective )
+	out.write( R , S , P , M , affectations , objective )
 
 
 def validate ( ) :
@@ -94,7 +94,7 @@ def validate ( ) :
 
 	additional = ( None , { "problem" : problem } )
 
-	name = lambda solution : int( os.path.basename( solution ) )
+	name = lambda solution : int( os.path.basename( solution.split( "-" )[0] ) )
 
 	for solution in sorted( args.solutions , key = name ) :
 
