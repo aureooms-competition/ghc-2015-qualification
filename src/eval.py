@@ -1,5 +1,5 @@
 
-def objective( groups , rows ) :
+def objective ( groups , rows ) :
 
 	return min( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
 
@@ -12,12 +12,13 @@ def tableau ( R , P , affectations ) :
 	for affectation in affectations :
 
 		g = affectation.group
-		s = affectation.server
-		i = affectation.interval
+		server = affectation.server
+		interval = affectation.interval
+		r = interval.row
 
-		groups[g] += s.capacity
+		groups[g] += server.capacity
 
-		rows[i.row][g] += s.capacity
+		rows[r][g] += server.capacity
 
 	return groups , rows
 
