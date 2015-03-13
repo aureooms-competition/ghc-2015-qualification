@@ -15,7 +15,9 @@ def write ( M , affectations , objective ) :
 		fmt = "%d %d %d\n"
 		notused = "x\n"
 
-		for i in range( M ) :
+		i = 0
+
+		while i < M :
 
 			if j >= A : break
 
@@ -33,6 +35,8 @@ def write ( M , affectations , objective ) :
 			else : line = notused
 
 			f.write( line )
+
+			i += 1
 
 
 		while i < M :
