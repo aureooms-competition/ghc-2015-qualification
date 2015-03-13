@@ -1,5 +1,5 @@
 
-class Server :
+class Server ( object ) :
 
 	def __init__ ( self , id , capacity , size ) :
 
@@ -7,7 +7,11 @@ class Server :
 		self.capacity = capacity
 		self.size = size
 
-class Interval :
+	def __str__( self ) :
+
+		return "S %(id)s %(capacity)s %(size)s" % self.__dict__
+
+class Interval ( object ) :
 
 	def __init__ ( self , row , start , size ) :
 
@@ -15,8 +19,11 @@ class Interval :
 		self.start = start
 		self.size = size
 
+	def __str__( self ) :
 
-class Affectation :
+		return "I %(row)s %(start)s %(size)s" % self.__dict__
+
+class Affectation ( object ) :
 
 	def __init__ ( self , server , interval , position , group = -1 ) :
 
@@ -25,9 +32,6 @@ class Affectation :
 		self.position = position
 		self.group = group
 
-class Capacity :
+	def __str__( self ) :
 
-	def __init__ ( self , total , guaranteed ) :
-
-		self.total = total
-		self.guaranteed = guaranteed
+		return "A %(server)s %(interval)s %(position)s %(group)s" % self.__dict__
