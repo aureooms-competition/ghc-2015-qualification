@@ -50,6 +50,7 @@ def roundrobin ( R , servers , intervals ) :
 	affectations = []
 
 	available = [ interval.size for interval in intervals ]
+	affectations = [ [ ] for interval in intervals ]
 
 	#	changed = True
 	#
@@ -58,6 +59,8 @@ def roundrobin ( R , servers , intervals ) :
 	#		changed = False
 	#
 	#		replaced = [ ]
+
+	recycled = [ ]
 
 	for server in servers :
 
@@ -69,8 +72,54 @@ def roundrobin ( R , servers , intervals ) :
 
 				available[i] -= server.size
 				affectation = Affectation( server , interval , available[i] )
-				affectations.append( affectation )
+				affectations[i].append( affectation )
 				break
 
-	return affectations
+		else : recycled.append( server )
+
+	changed = True
+
+	while changed :
+
+		changed = False
+
+		server = recycled
+
+		recycled = [ ]
+
+		for server in servers :
+
+			used = True
+
+			for _ in range( R ) :
+
+				i , interval = next( tourniquet )
+
+				for j , oldaffectation in enumerate( affectations[i] ) :
+
+					old = oldaffectation.server
+
+					better = server.capacity > old.capacity
+
+					if better and server.size <= available[i] + old.size :
+
+						available[i] -= server.size - old.size
+						affectation = Affectation( server , interval , available[i] )
+						affectations[i][j] = affectation
+
+						changed = True
+						recycled.append( old )
+
+						break
+
+				else :
+
+					used = False
+
+				if used : break
+
+			else : recycled.append( server )
+
+
+	return sum( affectations , [ ] )
 
