@@ -18,7 +18,7 @@ def solve ( ) :
 	# parse problem
 
 	problem = file.read( args.input , parse.tokenize , parse.problem )
-	R , S , U , P , M , intervals , servers = problem
+	R , S , U , P , M , intervals , servers , _ = problem
 
 	# solve
 
@@ -50,18 +50,45 @@ def validate ( ) :
 	# parse problem
 
 	problem = file.read( args.input , parse.tokenize , parse.problem )
-	R , S , U , P , M , intervals , servers = problem
+	R , S , U , P , M , intervals , servers , rows = problem
 
 	# validate solutions
 
 	additional = ( None , { "problem" : problem } )
 
-	for solution in args.solutions :
+	name = lambda solution : int( os.path.basename( solution ) )
 
-		expected = int( os.path.basename( solution ) )
+	for solution in sorted( args.solutions , key = name ) :
+
+		expected = name( solution )
 
 		affectations = file.read( solution , parse.affectations , parse.solution , additional = additional )
 
 		objective = eval.all( R , P , affectations )
 
 		print( objective == expected , solution , objective )
+
+		# validate
+
+		slotsused = [ [ 0 ] * S for _ in range( R ) ]
+
+		serversused = [ 0 ] * M
+
+		for affectation in affectations :
+
+			i = affectation.server.id
+			r = affectation.interval.row
+			position = affectation.interval.start + affectation.position
+
+			serversused[i] += 1
+
+			for j in range( position , position + affectation.server.size ) :
+
+				slotsused[r][j] += 1
+
+		for i , used in enumerate( serversused ) :
+
+			if used > 1 :
+
+				print( "[INFEASIBLE] Server %d used %d times" % ( i , used ) )
+

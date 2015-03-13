@@ -77,7 +77,7 @@ def problem ( tokens ) :
 		servers.append( server )
 
 
-	return R , S , U , P , M , intervals , servers
+	return R , S , U , P , M , intervals , servers , rows
 
 
 def affectations ( lines ) :
@@ -97,7 +97,7 @@ def solution ( tuples , problem = None ) :
 
 	affectations = [ ]
 
-	R , S , U , P , M , intervals , servers = problem
+	R , S , U , P , M , intervals , servers , _ = problem
 
 	rows = [ [ ] for i in range ( R ) ]
 
@@ -144,6 +144,12 @@ def solution ( tuples , problem = None ) :
 		if server is None :
 
 			raise Exception( "could not find server" )
+
+		position -= interval.start
+
+		if not 0 <= position < S :
+
+			raise Exception( "invalid slot position" )
 
 		affectation = Affectation( server , interval , position , group )
 
