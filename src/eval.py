@@ -29,3 +29,30 @@ def all ( R , P , affectations ) :
 
 	return objective( groups , rows )
 
+
+def groupchange ( solution , mutation ) :
+
+	groups = solution.groups
+	rows = solution.rows
+
+	affectation , grp = mutation
+
+	old = affectation.group
+
+	capacity = affectation.server.capacity
+
+	groups[old] -= capacity
+	groups[grp] += capacity
+
+	rows[affectation.interval.row][old] -= capacity
+	rows[affectation.interval.row][grp] += capacity
+
+	obj = objective( solution.groups , solution.rows )
+
+	groups[old] += capacity
+	groups[grp] -= capacity
+
+	rows[affectation.interval.row][old] += capacity
+	rows[affectation.interval.row][grp] -= capacity
+
+	return obj

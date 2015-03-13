@@ -59,15 +59,16 @@ def firstfit ( servers , intervals , iterations = 1 ) :
 
 
 
-def localsearch ( R , P , affectations , iterations = 1 , swaps = 2 ) :
+def localsearch ( R , P , solution , iterations = 1 , swaps = 2 ) :
+
+	affectations = solution.affectations
+	groups = solution.groups
+	rows = solution.rows
+	best = solution.objective
 
 	A = len( affectations )
 
 	swaps = min( swaps , A )
-
-	groups , rows = eval.tableau(  R , P , affectations )
-
-	best = eval.objective( groups , rows )
 
 	for i in range( iterations ) :
 
@@ -94,11 +95,13 @@ def localsearch ( R , P , affectations , iterations = 1 , swaps = 2 ) :
 
 		objective = eval.objective( groups , rows )
 
-		if objective >= best :
+		if objective > best :
 
-			best = objective
+			solution.objective = best = objective
 
-		else :
+			yield solution
+
+		elif objective < best :
 
 			for affectation , grp , old in zip( sample , grps , olds ) :
 
@@ -112,4 +115,42 @@ def localsearch ( R , P , affectations , iterations = 1 , swaps = 2 ) :
 				rows[affectation.interval.row][old] += capacity
 				rows[affectation.interval.row][grp] -= capacity
 
-	return affectations , best
+
+
+def vnd ( solution , pivoting , ordering ) :
+
+	k = 0
+
+	O = len( ordering )
+
+	while k < O :
+
+		best = pivoting( solution , ordering[k].walk , ordering[k].eval )
+
+		while best.first :
+
+			opt += best.first
+			ordering[k].eval( solution , best.second )
+			ordering[k].apply( solution , best.second )
+
+			k = 0
+			best = pivoting( solution , ordering[k].walk , ordering[k].eval )
+
+		k += 1
+
+
+def ii ( solution , pivoting , walk , eval , apply ) :
+
+	while True :
+
+		mutation , objective = pivoting( solution , walk , eval )
+
+		if mutation is None : break
+
+		apply( solution , mutation )
+
+		solution.objective = objective
+
+		yield solution
+
+

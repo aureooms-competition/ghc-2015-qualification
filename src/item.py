@@ -35,3 +35,13 @@ class Affectation ( object ) :
 	def __str__( self ) :
 
 		return "A %(server)s %(interval)s %(position)s %(group)s" % self.__dict__
+
+
+class Solution ( object ) :
+
+	def __init__ ( self , affectations , groups , rows , objective ) :
+
+		self.affectations = affectations
+		self.groups = groups
+		self.rows = rows
+		self.objective = objective

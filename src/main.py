@@ -2,18 +2,26 @@ import fileinput
 import argparse
 import os.path
 
-from src import fd , parse , allocate , init , solver , eval , out , file
+from src import fd , parse , allocate , init , solver , out , file
+
+from src import pivoting , walk , eval , apply
+
+from src.item import Solution
 
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
 
 
-def firstfit (  args , R , S , U , P , M , intervals , servers , rows ) :
+def firstfit (  args , problem ) :
+
+	R , S , U , P , M , intervals , servers , rows = problem
 
 	return solver.firstfit( servers , intervals , iterations = args.firstfit )
 
 
-def roundrobin ( args , R , S , U , P , M , intervals , servers , rows ) :
+def roundrobin ( args , problem ) :
+
+	R , S , U , P , M , intervals , servers , rows = problem
 
 	servers = sorted( servers , key = lambda x : x.capacity / x.size , reverse = True )
 
@@ -29,8 +37,30 @@ def roundrobin ( args , R , S , U , P , M , intervals , servers , rows ) :
 
 	return sum( affectations , [ ] )
 
+LOCALSEARCH = "localsearch"
+II = "ii"
+
+def localsearch ( args , problem , solution  ) :
+
+	R , S , U , P , M , intervals , servers , rows = problem
+
+	return solver.localsearch( R , P , solution , iterations = args.localsearch , swaps = args.swaps )
+
+def ii ( args , problem , solution ) :
+
+	R , S , U , P , M , intervals , servers , rows = problem
+
+	return solver.ii(
+		solution ,
+		pivoting.firstoreq ,
+		walk.RandomGroupChange( P ) ,
+		eval.groupchange ,
+		apply.groupchange
+	)
 
 ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin }
+
+ALGORITHMS = { LOCALSEARCH : localsearch , II : ii }
 
 def solve ( ) :
 
@@ -43,6 +73,7 @@ def solve ( ) :
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
+	parser.add_argument( "-A" , "--algorithm" , help = "# local search algorithm" , type = str , choices = ALGORITHMS , required = True )
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
 	args = parser.parse_args( )
 
@@ -55,7 +86,7 @@ def solve ( ) :
 
 	if args.solution is None :
 
-		affectations = ALLOCATORS[args.allocator]( args , R , S , U , P , M , intervals , servers , rows )
+		affectations = ALLOCATORS[args.allocator]( args , problem )
 
 		print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
@@ -66,9 +97,22 @@ def solve ( ) :
 		additional = ( None , { "problem" : problem } )
 		affectations = file.read( args.solution , parse.affectations , parse.solution , additional = additional )
 
+	# create evaluation tableau and solution state
+
+	grps , rws = eval.tableau( R , P , affectations )
+
+	objective = eval.objective( grps , rws )
+
+	solution = Solution( affectations , grps , rws , objective )
+
 	# solve
 
-	affectations , objective = solver.localsearch( R , P , affectations , iterations = args.localsearch , swaps = args.swaps )
+	for _ in ALGORITHMS[args.algorithm]( args , problem , solution ) :
+
+		print( solution.objective )
+
+	affectations = solution.affectations
+	objective = solution.objective
 
 	print( "Final score : %d" % objective )
 	print( "Final score : %d" % eval.all( R , P , affectations ) )
