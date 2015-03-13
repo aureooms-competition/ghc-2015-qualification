@@ -4,12 +4,28 @@ import os.path
 
 from src import fd , parse , allocate , solver , eval , out , file
 
+FIRSTFIT = "firstfit"
+ROUNDROBIN = "roundrobin"
+
+def firstfit (  args , R , S , U , P , M , intervals , servers , rows ) :
+
+	return solver.firstfit( servers , intervals , iterations = args.firstfit )
+
+def roundrobin ( args , R , S , U , P , M , intervals , servers , rows ) :
+
+	servers = sorted( servers , key = lambda x : x.capacity / x.size , reverse = True )
+
+	return allocate.roundrobin( R , servers , intervals )
+
+ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin }
+
 def solve ( ) :
 
 	# parse args
 
 	parser = argparse.ArgumentParser( )
 	parser.add_argument( "input" , help = "input file" , type = str )
+	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
@@ -18,15 +34,11 @@ def solve ( ) :
 	# parse problem
 
 	problem = file.read( args.input , parse.tokenize , parse.problem )
-	R , S , U , P , M , intervals , servers , _ = problem
+	R , S , U , P , M , intervals , servers , rows = problem
 
 	# solve
 
-	# affectations = solver.firstfit( servers , intervals , iterations = args.firstfit )
-
-	servers = sorted( servers , key = lambda x : x.capacity / x.size , reverse = True )
-
-	affectations = allocate.roundrobin( R , servers , intervals )
+	affectations = ALLOCATORS[args.allocator]( args , R , S , U , P , M , intervals , servers , rows )
 
 	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
