@@ -86,7 +86,7 @@ def recycle ( R , recycled , tourniquet , available , affectations ) :
 
 		for server in servers :
 
-			used = True
+			used = False
 
 			for _ in range( R ) :
 
@@ -100,18 +100,23 @@ def recycle ( R , recycled , tourniquet , available , affectations ) :
 
 					if better and server.size <= available[i] + old.size :
 
-						available[i] -= server.size - old.size
+						for k in range( j + 1 , len( affectations[i] ) ) :
+
+							affectations[i][k].position += old.size
+
+						available[i] += old.size
+						available[i] -= server.size
+
 						affectation = Affectation( server , interval , available[i] )
-						affectations[i][j] = affectation
+
+						affectations[i].pop( j )
+						affectations[i].append( affectation )
 
 						changed = True
 						recycled.append( old )
 
+						used = True
 						break
-
-				else :
-
-					used = False
 
 				if used : break
 
