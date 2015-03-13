@@ -41,9 +41,10 @@ def firstfit ( servers , intervals , iterations = 1 ) :
 	bestScore = 0
 	score = 0
 
-	shuffle( servers )
 
 	for i in range( iterations ) :
+
+		shuffle( servers )
 
 		res = affect( servers , intervals )
 		score = scoreAffectations( res )
