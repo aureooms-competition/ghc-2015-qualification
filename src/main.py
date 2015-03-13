@@ -2,7 +2,11 @@ import fileinput
 import argparse
 import os.path
 
-from src import fd , parse , allocate , init , solver , out , file
+from src import fd , action , parse , out , file
+
+from src.ascii import valid , warning , error
+
+from src import init , allocate , solver
 
 from src import pivoting , walk , eval , apply
 
@@ -69,11 +73,11 @@ def solve ( ) :
 	parser = argparse.ArgumentParser( )
 	parser.add_argument( "input" , help = "input file" , type = str )
 	parser.add_argument( "--solution" , help = "existing solution to optimize" , type = str )
-	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , required = True )
+	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , required = True , action = action.Dict )
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
-	parser.add_argument( "-A" , "--algorithm" , help = "# local search algorithm" , type = str , choices = ALGORITHMS , required = True )
+	parser.add_argument( "-A" , "--algorithm" , help = "# algorithm" , type = str , choices = ALGORITHMS , required = True , action = action.Dict )
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
 	args = parser.parse_args( )
 
@@ -86,7 +90,7 @@ def solve ( ) :
 
 	if args.solution is None :
 
-		affectations = ALLOCATORS[args.allocator]( args , problem )
+		affectations = args.allocator( args , problem )
 
 		print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
@@ -107,7 +111,7 @@ def solve ( ) :
 
 	# solve
 
-	for _ in ALGORITHMS[args.algorithm]( args , problem , solution ) :
+	for _ in args.algorithm( args , problem , solution ) :
 
 		print( solution.objective )
 
@@ -148,7 +152,7 @@ def validate ( ) :
 
 		objective = eval.all( R , P , affectations )
 
-		print( objective == expected , solution , objective )
+		( valid if objective == expected else error )( "%s %d" % ( solution , objective ) )
 
 		# validate
 
@@ -172,7 +176,7 @@ def validate ( ) :
 
 			if used > 1 :
 
-				print( "[INFEASIBLE] Server %d used %d times" % ( i , used ) )
+				error( "[INFEASIBLE] Server %d used %d times" % ( i , used ) )
 
 		for r , row , urow in zip( range( R ) , rows , slotsused ) :
 
@@ -182,4 +186,4 @@ def validate ( ) :
 
 				if used > authorized :
 
-					print( "[INFEASIBLE] Row %d , slot %d , used %d > %d times" % ( r , i , used , authorized ) )
+					error( "[INFEASIBLE] Row %d , slot %d , used %d > %d times" % ( r , i , used , authorized ) )
