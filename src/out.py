@@ -28,14 +28,14 @@ def blueprint ( R , S , P , affectations ) :
 
 def objective ( solution ) :
 
-	int( os.path.basename( solution.split( "-" )[0] ) )
+	return int( os.path.basename( solution.split( "-" )[0] ) )
 
 
-def improves ( objective ) :
+def improves ( obj ) :
 
-	best = max( os.listdir( OUT ) , key = objective )
+	best = int( max( os.listdir( OUT ) , key = objective ) )
 
-	return objective > best
+	return obj > best
 
 
 
