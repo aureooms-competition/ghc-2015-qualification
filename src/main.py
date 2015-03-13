@@ -25,7 +25,7 @@ def roundrobin ( args , R , S , U , P , M , intervals , servers , rows ) :
 
 	recycled = allocate.roundrobin( R , servers , tourniquet , available , affectations )
 
-	allocate.recycle( R , recycled , tourniquet , available , affectations )
+	if args.recycle : allocate.recycle( R , recycled , tourniquet , available , affectations )
 
 	return sum( affectations , [ ] )
 
@@ -38,7 +38,8 @@ def solve ( ) :
 
 	parser = argparse.ArgumentParser( )
 	parser.add_argument( "input" , help = "input file" , type = str )
-	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS )
+	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , required = True )
+	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
