@@ -57,15 +57,13 @@ def firstfit ( servers , intervals , iterations = 1 ) :
 
 	return best
 
+
+
 def localsearch ( R , P , affectations , iterations = 1 , swaps = 2 ) :
 
 	A = len( affectations )
 
 	swaps = min( swaps , A )
-
-	for affectation in affectations :
-
-		affectation.group = randint( 0 , P - 1 )
 
 	groups , rows = eval.tableau(  R , P , affectations )
 

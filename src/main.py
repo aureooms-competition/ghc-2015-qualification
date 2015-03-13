@@ -2,7 +2,7 @@ import fileinput
 import argparse
 import os.path
 
-from src import fd , parse , allocate , solver , eval , out , file
+from src import fd , parse , allocate , init , solver , eval , out , file
 
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
@@ -55,6 +55,8 @@ def solve ( ) :
 	affectations = ALLOCATORS[args.allocator]( args , R , S , U , P , M , intervals , servers , rows )
 
 	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
+
+	init.random( P , affectations )
 
 	affectations , objective = solver.localsearch( R , P , affectations , iterations = args.localsearch , swaps = args.swaps )
 
