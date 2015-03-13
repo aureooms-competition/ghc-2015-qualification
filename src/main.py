@@ -12,14 +12,13 @@ def main ( ) :
 
 	R , S , U , P , M , intervals , servers = parse.all( tokens )
 
-	print ("result\n\n")
+	affectations = solver.firstfit( servers , intervals , iterations = 100 )
 
-	affectations = solver.first_fit( servers , intervals , iterations = 1 )
-	print ("Servers : ", M, "Affectations :",len(affectations))
+	print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
 
-	final_res = solver.affect_group_local_search(affectations, R, P)
+	affectations , objective = solver.localsearch( R , P , affectations , iterations = 100 )
 
-	objective = eval.all( R , P , final_res  )
+	print( "Final score : %d" % objective )
 
-	out.write( M , final_res , objective )
+	out.write( M , affectations , objective )
 

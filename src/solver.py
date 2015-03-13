@@ -1,5 +1,4 @@
 from src import key
-from src import item
 from src import eval
 from random import randint
 from random import shuffle
@@ -29,12 +28,12 @@ def affect ( servers , intervals ) :
 	return affectations
 
 
-def scoreAffectations( affectations ) :
+def scoreAffectations ( affectations ) :
 
 	return sum( affectation.server.capacity for affectation in affectations )
 
 
-def first_fit( servers , intervals , iterations = 1 ) :
+def firstfit ( servers , intervals , iterations = 1 ) :
 
 	best = []
 	res = []
@@ -46,40 +45,54 @@ def first_fit( servers , intervals , iterations = 1 ) :
 
 	for i in range( iterations ) :
 
-		res = affect(servers, intervals)
-		score = scoreAffectations(res)
-		if score > bestScore:
-			print("number of affectations : ", len(res))
+		res = affect( servers , intervals )
+		score = scoreAffectations( res )
+
+		if score > bestScore :
+
+			print( "number of affectations : " , len( res ) )
 			best = res
 			bestScore = score
 
 	return best
 
-def affect_group_local_search(affectations, R, P):
-	score = 0
-	for i in range(len(affectations)):
-		grp = randint(0, P-1)
-		affectations[i].group = grp
-	total = 200000
-	i = 0
-	while i < total:
-		if i % (total/100) == 0:
-			print(100*i/total,"%","   score = ",score)
-		aff1 = randint(0, len(affectations)-1)
-		aff2 = randint(0, len(affectations)-1)
-		grp1 = randint(0, P-1)
-		grp2 = randint(0, P-1)
+def localsearch ( R , P , affectations , iterations = 1 ) :
+
+	A = len( affectations )
+
+	best = 0
+
+	for affectation in affectations :
+
+		group = randint( 0 , P - 1 )
+		affectation.group = group
+
+	for i in range( iterations ) :
+
+		if iterations >= 100 and not i % ( iterations // 100 ) :
+			print( "%d%%   score = %d" % ( 100 * i / iterations , best ) )
+
+		aff1 = randint( 0 , A - 1 )
+		aff2 = randint( 0 , A - 1 )
+
+		grp1 = randint( 0 , P - 1 )
+		grp2 = randint( 0 , P - 1 )
+
 		old1 = affectations[aff1].group
 		old2 = affectations[aff2].group
+
 		affectations[aff1].group = grp1
 		affectations[aff2].group = grp2
-		res = eval.all(R,P,affectations)
-		if res >= score:
-			score = res
-		else:
+
+		objective = eval.all( R , P , affectations )
+
+		if objective >= best :
+
+			best = objective
+
+		else :
+
 			affectations[aff1].group = old1
 			affectations[aff2].group = old2
-		i+=1
-	print ("Final score : ", score)
-	return affectations
 
+	return affectations , best
