@@ -71,7 +71,7 @@ def localsearch ( R , P , affectations , iterations = 1 ) :
 	for i in range( iterations ) :
 
 		if iterations >= 100 and not i % ( iterations // 100 ) :
-			print( "%d%%   score = %d" % ( 100 * i / iterations , best ) )
+			print( "%3d%%   score = %d" % ( 100 * i / iterations , best ) )
 
 		aff1 = randint( 0 , A - 1 )
 		aff2 = randint( 0 , A - 1 )
