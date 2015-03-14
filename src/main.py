@@ -99,6 +99,12 @@ def solve ( ) :
 		additional = ( None , { "problem" : problem } )
 		affectations = file.read( args.solution , parse.affectations , parse.solution , additional = additional )
 
+	# compute maximal possible score using this server affectation
+
+	ub = ( 1 - 1 / R ) * allocate.score( affectations ) / P
+
+	print( "UB %f" % ub )
+
 	# create evaluation tableau and solution state
 
 	groups , rows = eval.tableau( R , P , affectations )

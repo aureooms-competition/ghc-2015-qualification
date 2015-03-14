@@ -1,6 +1,12 @@
 
 from src.item import Affectation
 
+
+def score ( affectations ) :
+
+	return sum( affectation.server.capacity for affectation in affectations )
+
+
 class Pool :
 
 	def __init__( self ) :

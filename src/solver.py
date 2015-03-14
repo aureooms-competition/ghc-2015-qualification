@@ -1,5 +1,7 @@
 from src import key
 from src import eval
+from src import allocate
+
 from random import randint , shuffle
 
 import random
@@ -29,15 +31,10 @@ def affect ( servers , intervals ) :
 	return affectations
 
 
-def scoreAffectations ( affectations ) :
-
-	return sum( affectation.server.capacity for affectation in affectations )
-
-
 def firstfit ( servers , intervals , iterations = 1 ) :
 
-	best = []
-	res = []
+	best = [ ]
+	affectations = [ ]
 
 	bestScore = 0
 	score = 0
@@ -46,13 +43,13 @@ def firstfit ( servers , intervals , iterations = 1 ) :
 
 		shuffle( servers )
 
-		res = affect( servers , intervals )
-		score = scoreAffectations( res )
+		affectations = affect( servers , intervals )
+		score = allocate.score( affectations )
 
 		if score > bestScore :
 
-			print( "number of affectations : " , len( res ) )
-			best = res
+			print( "number of affectations : " , len( affectations ) )
+			best = affectations
 			bestScore = score
 
 	return best
