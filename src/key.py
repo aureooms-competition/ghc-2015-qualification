@@ -19,6 +19,10 @@ def row ( item ) :
 
 	return item.row
 
+def intervalrow ( item ) :
+
+	return item.interval.row
+
 def position ( item ) :
 
 	return item.position

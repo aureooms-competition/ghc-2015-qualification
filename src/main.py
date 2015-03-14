@@ -201,6 +201,7 @@ def solve ( ) :
 	parser.add_argument( "input" , help = "input file" , type = str )
 	parser.add_argument( "--solution" , help = "existing solution to optimize" , type = str )
 	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , action = action.Dict )
+	parser.add_argument( "-i" , "--init" , help = "initializator to use" , type = str , choices = init.DICT , action = action.Dict )
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
@@ -238,7 +239,7 @@ def solve ( ) :
 
 		print( "Servers : %d , Affectations : %d"  % ( problem.M , len( affectations ) ) )
 
-		init.random( P , affectations )
+		args.init( args , problem , affectations )
 
 	else :
 
