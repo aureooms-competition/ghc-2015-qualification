@@ -52,11 +52,11 @@ def knpsck ( args , problem ) :
 
 	affectations = [ ]
 
-	for interval in intervals :
+	for interval in problem.intervals :
 
 		available = interval.size
 
-		for server in servers :
+		for server in problem.servers :
 
 			if not next( solution ) : continue
 
