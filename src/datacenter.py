@@ -168,7 +168,7 @@ try :
 
 					lp.set_col_bnds( var.x( d , i , p ) , val , val )
 
-		solve( D , N , R , P , lp , SRV )
+		solve( D , N , R , P , lp )
 
 		for d in range( D ) :
 
