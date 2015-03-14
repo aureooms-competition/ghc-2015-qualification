@@ -1,0 +1,59 @@
+#! /bin/bash
+
+# Thanks to +Axel Tripier
+# https://plus.google.com/117825246665274499908/posts/hBPqNx6jcnH
+
+# ./visualize in/dc.in out/0-0
+
+INPUT_FILE="$1"
+OUTPUT_FILE="$2"
+
+if [[ "$INPUT_FILE" == "" ]] ; then
+  echo 'Input file missing!'
+  exit 1
+fi
+
+if [[ "$OUTPUT_FILE" == "" ]] ; then
+  echo 'Output file missing!'
+  exit 1
+fi
+
+read rangees emplacements indispo groupes serveurs <<< $(head -n 1 "$INPUT_FILE")
+
+datas_in=$(cat $INPUT_FILE | tail -n $(($indispo+$serveurs)) )
+
+emplacements_indispos=$(echo "$datas_in" | head -n $indispo )
+serveurs_a_allouer=$(echo "$datas_in" | tail -n $serveurs )
+
+clear
+
+for i in `seq 0 $(($rangees-1))` ; do
+  tput cup $i $emplacements ; echo -n "|"
+done
+
+echo "$emplacements_indispos" | while read rangee numero ; do
+  tput cup $rangee $numero ; echo -n "X"
+done
+
+nb_serveurs_a_allouer=$(echo "$serveurs_a_allouer" | wc -l)
+
+for i in `seq 1 $nb_serveurs_a_allouer` ; do
+  serveur=$(echo "$serveurs_a_allouer" | head -n "$i" | tail -n 1)
+  read emplacements capacite <<< $serveur
+  emplacement=$(cat "$OUTPUT_FILE" | head -n "$i" | tail -n 1)
+  if [[ "$emplacement" == "x" ]] ; then
+    continue
+  fi
+  read rangee emplacement groupe <<< $emplacement
+  id_color=$((groupe+90))
+  id_char_groupe=$((33+$groupe))
+  char="$(printf '%x' $id_char_groupe)"
+  tput cup $rangee $emplacement
+  tput setab $id_color
+  for i in `seq 1 $emplacements` ; do
+    echo -ne "\x$char"
+  done
+  tput sgr0
+done
+
+tput cup $(($rangees)) 0
