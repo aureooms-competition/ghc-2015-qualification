@@ -1,7 +1,19 @@
 
+def guaranteed ( groups , rows ) :
+
+	return ( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
+
+def richest ( groups , rows ) :
+
+	return max( enumerate( guaranteed( groups , rows ) ) , key = lambda t : t[1] )
+
+def poorest ( groups , rows ) :
+
+	return min( enumerate( guaranteed( groups , rows ) ) , key = lambda t : t[1] )
+
 def objective ( groups , rows ) :
 
-	return min( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
+	return min( guaranteed( groups , rows ) )
 
 def tableau ( R , P , affectations ) :
 

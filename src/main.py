@@ -48,6 +48,12 @@ def ii ( args , problem , solution ) :
 		args.neighborhood.Apply( problem )
 	)
 
+
+def optimize ( args , problem , solution ) :
+
+	return solver.optimize( problem.R , problem.P , solution )
+
+
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
 
@@ -55,8 +61,9 @@ ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin }
 
 LOCALSEARCH = "ls"
 II = "ii"
+OPTIMIZE = "opt"
 
-ALGORITHMS = { LOCALSEARCH : localsearch , II : ii }
+ALGORITHMS = { LOCALSEARCH : localsearch , II : ii , OPTIMIZE : optimize }
 
 def solve ( ) :
 
@@ -65,7 +72,7 @@ def solve ( ) :
 	parser = argparse.ArgumentParser( )
 	parser.add_argument( "input" , help = "input file" , type = str )
 	parser.add_argument( "--solution" , help = "existing solution to optimize" , type = str )
-	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , required = True , action = action.Dict )
+	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , action = action.Dict )
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
@@ -101,7 +108,10 @@ def solve ( ) :
 
 	# compute maximal possible score using this server affectation
 
+	sa = ( 1 - 1 / R ) * sum( server.capacity for server in problem.servers ) / P
 	ub = ( 1 - 1 / R ) * allocate.score( affectations ) / P
+
+	print( "SA %f" % sa )
 
 	print( "UB %f" % ub )
 
@@ -134,8 +144,6 @@ def solve ( ) :
 
 	print( "Final score : %d" % objective )
 	print( "Final score : %d" % eval.all( R , P , affectations ) )
-
-	out.write( R , S , P , M , affectations , objective )
 
 
 def validate ( ) :

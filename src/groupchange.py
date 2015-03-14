@@ -77,6 +77,11 @@ class Apply ( object ) :
 
 	def __call__ ( self , solution , mutation ) :
 
+		apply( solution , mutation )
+
+
+def apply ( solution , mutation ) :
+
 		groups = solution.groups
 		rows = solution.rows
 

@@ -1,8 +1,9 @@
 from src import key
 from src import eval
 from src import allocate
+from src import groupchange
 
-from random import randint , shuffle
+from random import randint , shuffle , sample
 
 import random
 
@@ -151,3 +152,37 @@ def ii ( solution , pivoting , walk , eval , apply ) :
 		yield solution
 
 
+def optimize ( R , P , solution ) :
+
+	affectations = solution.affectations
+
+	groups = solution.groups
+	rows = solution.rows
+
+	while True :
+
+		y , small = eval.poorest( groups , rows )
+
+		solution.objective = small
+
+		yield solution
+
+		guaranteed = list( enumerate( eval.guaranteed( groups , rows ) ) )
+
+		shuffle( guaranteed )
+
+		for x , big in guaranteed :
+
+			if x == y : continue
+
+			available = list( filter( lambda a : a.group == x and big - a.server.capacity >= small , affectations ) )
+
+			if not available : continue
+
+			affectation = sample( available , 1 )[0]
+
+			groupchange.apply( solution , ( affectation , y ) )
+
+			break
+
+		else : break
