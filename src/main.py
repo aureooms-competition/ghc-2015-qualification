@@ -10,6 +10,8 @@ from src import init , allocate , solver , eval
 
 from src import pivoting , neighborhood
 
+from src import knapsack
+
 from src.item import Solution
 
 
@@ -34,6 +36,20 @@ def roundrobin ( args , problem ) :
 
 	return sum( affectations , [ ] )
 
+def knpsck ( args , problem ) :
+
+	D = len( problem.intervals )
+	N = len( problem.servers )
+	v = [ server.capacity for server in problem.servers ]
+	w = [ server.size for server in problem.servers ]
+	W = [ interval.size for interval in problem.intervals ]
+
+	lp = knapsack.multidimensional( D , N , v , w , W )
+
+	knapsack.solve( D , N , lp )
+
+	return [ ]
+
 def localsearch ( args , problem , solution ) :
 
 	return solver.localsearch( problem.R , problem.P , solution , iterations = args.localsearch , swaps = args.swaps )
@@ -56,8 +72,9 @@ def optimize ( args , problem , solution ) :
 
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
+KNAPSACK = "knapsack"
 
-ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin }
+ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin , KNAPSACK : knpsck }
 
 LOCALSEARCH = "ls"
 II = "ii"
