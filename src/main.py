@@ -1,6 +1,8 @@
 import fileinput
 import argparse
 import os.path
+import signal
+import sys
 
 from src import fd , action , parse , out , file
 
@@ -84,16 +86,7 @@ def ii ( args , problem , solution ) :
 		args.neighborhood.Apply( problem )
 	)
 
-
-def optimize1 ( args , problem , solution ) :
-
-	return solver.optimize1( problem.R , problem.P , solution )
-
-def optimize2 ( args , problem , solution ) :
-
-	return solver.optimize2( problem.R , problem.P , solution )
-
-def optimize3 ( args , problem , solution ) :
+def optimize ( args , problem , solution ) :
 
 	while True :
 
@@ -105,6 +98,22 @@ def optimize3 ( args , problem , solution ) :
 
 			yield solution
 
+		for _ , solution in zip( range( 50 ) , solver.optimize3( problem.R , problem.P , solution ) ) :
+
+			yield solution
+
+def optimize1 ( args , problem , solution ) :
+
+	return solver.optimize1( problem.R , problem.P , solution )
+
+def optimize2 ( args , problem , solution ) :
+
+	return solver.optimize2( problem.R , problem.P , solution )
+
+def optimize3 ( args , problem , solution ) :
+
+	return solver.optimize3( problem.R , problem.P , solution )
+
 
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
@@ -114,6 +123,7 @@ ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin , KNAPSACK : knpsck
 
 LOCALSEARCH = "ls"
 II = "ii"
+OPT = "opt"
 OPT1 = "opt1"
 OPT2 = "opt2"
 OPT3 = "opt3"
@@ -122,6 +132,7 @@ NOOP = "noop"
 ALGORITHMS = {
 	LOCALSEARCH : localsearch ,
 	II : ii ,
+	OPT  : optimize ,
 	OPT1 : optimize1 ,
 	OPT2 : optimize2 ,
 	OPT3 : optimize3 ,
@@ -186,6 +197,16 @@ def solve ( ) :
 	objective = eval.objective( groups , rows )
 
 	solution = Solution( affectations , groups , rows , objective )
+
+	if args.write :
+
+		def handler ( signal , frame ) :
+
+			out.write( R , S , P , M , solution.affectations , solution.objective )
+
+			sys.exit( 0 )
+
+		signal.signal( signal.SIGINT , handler )
 
 	# solve
 

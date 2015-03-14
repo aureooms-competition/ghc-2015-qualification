@@ -1,6 +1,38 @@
 
 from src import key
 
+def max2 ( iterable , key = None ) :
+
+	"""
+
+		>>> max2( )
+
+	"""
+
+	first = next( iterable , None )
+	second = next( iterable , None )
+
+	if second is None or first is None :
+
+		return first , second
+
+	if key( second ) > key( first ) :
+
+		first , second = second , first
+
+	for item in iterable :
+
+		if key( item ) > key( first ) :
+
+			second = first
+			first = item
+
+		elif key( item ) > key( second ) :
+
+			second = item
+
+	return first , second
+
 def rows ( rws , g ) :
 
 	return ( ( r , row[g] ) for r , row in enumerate( rws ) )
@@ -9,9 +41,17 @@ def worst ( rws , g ) :
 
 	return max( rows( rws , g ) , key = key.second )
 
+def worst2 ( rws , g ) :
+
+	return max2( rows( rws , g ) , key = key.second )
+
 def guaranteed ( groups , rows ) :
 
 	return ( ( g , group - max( row[g] for row in rows ) ) for g , group in enumerate( groups ) )
+
+def sorted ( groups , rows ) :
+
+	return sorted( guaranteed( groups , rows ) , key = key.second )
 
 def richest ( groups , rows ) :
 

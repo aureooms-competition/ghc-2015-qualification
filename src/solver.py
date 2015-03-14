@@ -242,6 +242,59 @@ def optimize2 ( R , P , solution ) :
 
 		else : break
 
+
+def optimize3 ( R , P , solution ) :
+
+	affectations = solution.affectations
+
+	groups = solution.groups
+	rows = solution.rows
+
+	changed = True
+
+	while changed :
+
+		# changed = False
+
+		y , small = eval.poorest( groups , rows )
+
+		poors = list( filter( lambda t : t[1] == small , eval.guaranteed( groups , rows ) ) )
+
+		y , small = poors[ randint( 0 , len( poors ) - 1 ) ]
+
+		solution.objective = small
+
+		yield solution
+
+		for affectation in sorted( affectations , key = lambda x : x.group ) :
+
+			x = affectation.group
+
+			if x == y : continue
+
+			r = affectation.interval.row
+			worst1 , worst2 = eval.worst2( rows , x )
+
+			w1 , worst1 = worst1
+			w2 , worst2 = worst2
+
+			if r != w1 :
+
+				updated = groups[x] - worst1 - affectation.server.capacity
+
+			else :
+
+				updated = min( groups[x] - worst1 , groups[x] - worst2 - affectation.server.capacity )
+
+			if updated <= small : continue
+
+			print( "apply" , x , y , r , w1 , updated , small )
+
+			groupchange.apply( solution , ( affectation , y ) )
+
+			changed = True
+
+
 def process ( solution , available , rwsx , rwsy , rx , ry , vx , vy , apply ) :
 
 	for ax , ay in available :
