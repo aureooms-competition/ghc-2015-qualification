@@ -230,11 +230,13 @@ def solve ( ) :
 
 		problem.servers = list( filter( lambda s : s.capacity <= args.max , problem.servers ) )
 
-		M = problem.M = len( problem.servers )
+		# NOTE keep M unchanged for output
+
+		problem.M = len( problem.servers )
 
 		affectations = args.allocator( args , problem )
 
-		print( "Servers : %d , Affectations : %d"  % ( M , len( affectations ) ) )
+		print( "Servers : %d , Affectations : %d"  % ( problem.M , len( affectations ) ) )
 
 		init.random( P , affectations )
 
