@@ -118,8 +118,9 @@ def dtcntr ( args , problem , affectations = None ) :
 			if affectation is None : continue
 
 			st = affectation.interval.start
+			rw = affectation.interval.row
 
-			d = next( ( d for ( d , _ ) in enumerate( ins ) if _.start == st ) , None )
+			d = next( ( d for ( d , _ ) in enumerate( ins ) if _.row == rw and _.start == st ) , None )
 
 			SRV[i] = ( d , affectation.group )
 

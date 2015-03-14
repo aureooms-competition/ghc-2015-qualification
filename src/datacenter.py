@@ -160,11 +160,15 @@ try :
 
 				for p in range( P ) :
 
-					_d , _p = SRV[i]
+					if SRV[i] is None : val = 0
 
-					if d == _d and p == _p : val = 1
+					else :
 
-					else : val = 0
+						_d , _p = SRV[i]
+
+						if d == _d and p == _p : val = 1
+
+						else : val = 0
 
 					lp.set_col_bnds( var.x( d , i , p ) , val , val )
 
@@ -204,8 +208,6 @@ try :
 				for p in range( P ) :
 
 					val = lp.mip_col_val( var.x( d , i , p ) )
-
-					print( var.x( d , i , p ) , val )
 
 					lp.set_col_bnds( var.x( d , i , p ) , val , val )
 
