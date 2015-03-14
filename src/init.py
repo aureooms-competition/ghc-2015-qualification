@@ -17,7 +17,9 @@ def uniform ( args , problem , affectations ) :
 
 		affectation.group = i % problem.P
 
-def clever ( args , problem , affectations ) :
+def greedy ( args , problem , affectations ) :
+
+	# TODO really greedy
 
 	rows = [ [ 0 ] * problem.P for i in range( problem.R ) ]
 
@@ -37,10 +39,14 @@ def clever ( args , problem , affectations ) :
 
 		affectation.group = g
 
+
+def noop ( args , problem , affectations ) : pass
+
 DICT = {
 
 	"random"  : random ,
 	"uniform" : uniform ,
-	"clever" : clever
+	"greedy" : greedy ,
+	"noop" : noop
 
 }

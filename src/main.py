@@ -12,7 +12,7 @@ from src import init , allocate , solver , optimizer , eval
 
 from src import pivoting , neighborhood , destruct
 
-from src import knapsack
+from src import knapsack , datacenter
 
 from src.item import Affectation , Solution
 
@@ -71,6 +71,51 @@ def knpsck ( args , problem ) :
 			affectations.append( affectation )
 
 	return affectations
+
+
+def dtcntr ( args , problem ) :
+
+	D = len( problem.intervals )
+	N = len( problem.servers )
+	R = problem.R
+	P = problem.P
+	ROW = sorted( problem.intervals , key = lambda i : i.row )
+	v = [ server.capacity for server in problem.servers ]
+	w = [ server.size for server in problem.servers ]
+	W = [ interval.size for interval in problem.intervals ]
+
+	print( D , N , R , P , len(v) , len(w) , len(W) , len(ROW) , v , w , W , ROW )
+
+	lp = datacenter.problem( D , N , R , P , v , w , W , ROW )
+
+	print( "problem constructed" )
+
+	datacenter.solve( D , N , R , P , lp )
+
+	print( "solved" )
+
+	solution = datacenter.solution( D , N , R , P , lp )
+
+	affectations = [ ]
+
+	for interval in problem.intervals :
+
+		available = interval.size
+
+		for server in problem.servers :
+
+			for group in range( P ) :
+
+				if not next( solution ) : continue
+
+				available -= server.size
+
+				affectation = Affectation( server , interval , available , group )
+
+				affectations.append( affectation )
+
+	return affectations
+
 
 def noop ( args , problem , solution ) : return [ ]
 
@@ -170,8 +215,14 @@ def optimize3 ( args , problem , solution ) :
 FIRSTFIT = "firstfit"
 ROUNDROBIN = "roundrobin"
 KNAPSACK = "knapsack"
+DATACENTER = "datacenter"
 
-ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin , KNAPSACK : knpsck }
+ALLOCATORS = {
+	FIRSTFIT : firstfit ,
+	ROUNDROBIN : roundrobin ,
+	KNAPSACK : knpsck ,
+	DATACENTER : dtcntr
+}
 
 LOCALSEARCH = "ls"
 II = "ii"
@@ -201,7 +252,7 @@ def solve ( ) :
 	parser.add_argument( "input" , help = "input file" , type = str )
 	parser.add_argument( "--solution" , help = "existing solution to optimize" , type = str )
 	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , action = action.Dict )
-	parser.add_argument( "-i" , "--init" , help = "initializator to use" , type = str , choices = init.DICT , action = action.Dict )
+	parser.add_argument( "-i" , "--init" , help = "initializator to use" , type = str , choices = init.DICT , action = action.Dict , default = init.noop )
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
