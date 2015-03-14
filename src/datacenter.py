@@ -52,6 +52,8 @@ try :
 
 		lp.set_obj_coef( var.Z( ) , 1 )
 
+		lp.set_col_bnds( var.Z( ) , 0 , None )
+
 		for d in range( D ) :
 
 			for i in range( N ) :
@@ -93,6 +95,8 @@ try :
 
 			lp.set_row_bnds( k , 0 , 0 )
 
+			lp.set_col_bnds( var.a( p ) , 0 , None )
+
 			k += 1
 
 		for r in range( R ) :
@@ -121,6 +125,8 @@ try :
 
 			lp.set_row_bnds( k , 0 , None )
 
+			lp.set_col_bnds( var.g( p ) , 0 , None )
+
 			k += 1
 
 
@@ -135,6 +141,8 @@ try :
 				lp.set_mat_row( k , mapping )
 
 				lp.set_row_bnds( k , 0 , None )
+
+				lp.set_col_bnds( var.s( r , p ) , 0 , None )
 
 				k += 1
 
