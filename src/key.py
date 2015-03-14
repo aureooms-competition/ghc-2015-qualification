@@ -22,3 +22,7 @@ def row ( item ) :
 def position ( item ) :
 
 	return item.position
+
+def second ( item ) :
+
+	return item[1]

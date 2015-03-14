@@ -85,9 +85,25 @@ def ii ( args , problem , solution ) :
 	)
 
 
-def optimize ( args , problem , solution ) :
+def optimize1 ( args , problem , solution ) :
 
-	return solver.optimize( problem.R , problem.P , solution )
+	return solver.optimize1( problem.R , problem.P , solution )
+
+def optimize2 ( args , problem , solution ) :
+
+	return solver.optimize2( problem.R , problem.P , solution )
+
+def optimize3 ( args , problem , solution ) :
+
+	while True :
+
+		for _ , solution in zip( range( 50 ) , solver.optimize1( problem.R , problem.P , solution ) ) :
+
+			yield solution
+
+		for _ , solution in zip( range( 50 ) , solver.optimize2( problem.R , problem.P , solution ) ) :
+
+			yield solution
 
 
 FIRSTFIT = "firstfit"
@@ -98,10 +114,19 @@ ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin , KNAPSACK : knpsck
 
 LOCALSEARCH = "ls"
 II = "ii"
-OPTIMIZE = "opt"
+OPT1 = "opt1"
+OPT2 = "opt2"
+OPT3 = "opt3"
 NOOP = "noop"
 
-ALGORITHMS = { LOCALSEARCH : localsearch , II : ii , OPTIMIZE : optimize , NOOP : noop }
+ALGORITHMS = {
+	LOCALSEARCH : localsearch ,
+	II : ii ,
+	OPT1 : optimize1 ,
+	OPT2 : optimize2 ,
+	OPT3 : optimize3 ,
+	NOOP : noop
+}
 
 def solve ( ) :
 

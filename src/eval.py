@@ -1,19 +1,29 @@
 
+from src import key
+
+def rows ( rws , g ) :
+
+	return ( ( r , row[g] ) for r , row in enumerate( rws ) )
+
+def worst ( rws , g ) :
+
+	return max( rows( rws , g ) , key = key.second )
+
 def guaranteed ( groups , rows ) :
 
-	return ( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
+	return ( ( g , group - max( row[g] for row in rows ) ) for g , group in enumerate( groups ) )
 
 def richest ( groups , rows ) :
 
-	return max( enumerate( guaranteed( groups , rows ) ) , key = lambda t : t[1] )
+	return max( guaranteed( groups , rows ) , key = key.second )
 
 def poorest ( groups , rows ) :
 
-	return min( enumerate( guaranteed( groups , rows ) ) , key = lambda t : t[1] )
+	return min( guaranteed( groups , rows ) , key = key.second )
 
 def objective ( groups , rows ) :
 
-	return min( guaranteed( groups , rows ) )
+	return min( group - max( row[g] for row in rows ) for g , group in enumerate( groups ) )
 
 def tableau ( R , P , affectations ) :
 

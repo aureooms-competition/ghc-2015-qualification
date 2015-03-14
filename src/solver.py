@@ -1,11 +1,12 @@
 from src import key
 from src import eval
 from src import allocate
-from src import groupchange
+from src import groupchange , serverswap , slotswap
+
+import random , itertools
 
 from random import randint , shuffle , sample
 
-import random
 
 from src.item import Affectation
 
@@ -152,7 +153,7 @@ def ii ( solution , pivoting , walk , eval , apply ) :
 		yield solution
 
 
-def optimize ( R , P , solution ) :
+def optimize1 ( R , P , solution ) :
 
 	affectations = solution.affectations
 
@@ -167,7 +168,7 @@ def optimize ( R , P , solution ) :
 
 		yield solution
 
-		guaranteed = list( enumerate( eval.guaranteed( groups , rows ) ) )
+		guaranteed = list( eval.guaranteed( groups , rows ) )
 
 		shuffle( guaranteed )
 
@@ -186,3 +187,73 @@ def optimize ( R , P , solution ) :
 			break
 
 		else : break
+
+
+def optimize2 ( R , P , solution ) :
+
+	affectations = solution.affectations
+
+	groups = solution.groups
+	rows = solution.rows
+
+	while True :
+
+		y , small = eval.poorest( groups , rows )
+
+		solution.objective = small
+
+		yield solution
+
+		ry , vy = eval.worst( rows , y )
+
+		rwsy = list( eval.rows( rows , y ) )
+
+		guaranteed = list( eval.guaranteed( groups , rows ) )
+
+		shuffle( guaranteed )
+
+		done = False
+
+		for x , big in guaranteed :
+
+			if x == y : continue
+
+			rwsx = list( eval.rows( rows , x ) )
+
+			for rx , vx in sorted( rwsx , key = key.second , reverse = True ) :
+
+				avx = filter( lambda a : a.interval.row == rx , affectations )
+				avy = filter( lambda a : a.interval.row == ry , affectations )
+
+				avs = filter( lambda t : t[0].server.size == t[1].server.size , itertools.product( avx , avy ) )
+				avc = filter( lambda t : t[0].server.capacity == t[1].server.capacity , itertools.product( avx , avy ) )
+
+				if process( solution , avs , rwsx , rwsy , rx , ry , vx , vy , slotswap.apply ) :
+
+					done = True
+					break
+
+				if process( solution , avc , rwsx , rwsy , rx , ry , vx , vy , serverswap.apply ) :
+
+					done = True
+					break
+
+			if done : break
+
+		else : break
+
+def process ( solution , available , rwsx , rwsy , rx , ry , vx , vy , apply ) :
+
+	for ax , ay in available :
+
+		cx = ax.server.capacity
+		cy = ay.server.capacity
+
+		if rwsx[ry][1] + 2 * cx  <= vx and rwsy[rx][1] + 2 * cy <= vy :
+
+			apply( solution , ( ax , ay ) )
+
+			return True
+
+	return False
+
