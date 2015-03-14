@@ -1,6 +1,8 @@
 
 try :
 
+	GLP_IHEUR = 0x03
+
 	import ecyglpki as glpk
 
 	import itertools
@@ -38,7 +40,7 @@ try :
 
 			return self.x( self.D - 1 , self.N - 1 , self.P - 1 )
 
-	def problem ( D , N , R , P , v , w , W , ROW ) :
+	def problem ( D , N , R , P , v , w , W , ROW , lb = 0 , ub = None ) :
 
 		var = Variables( D , N , R , P )
 
@@ -52,7 +54,7 @@ try :
 
 		lp.set_obj_coef( var.Z( ) , 1 )
 
-		lp.set_col_bnds( var.Z( ) , 0 , None )
+		lp.set_col_bnds( var.Z( ) , lb , ub )
 
 		for d in range( D ) :
 
@@ -154,37 +156,13 @@ try :
 
 		var = Variables( D , N , R , P )
 
-		for d in range( D ) :
+		def cb ( tree , info ) :
 
-			for i in range( N ) :
+			if tree.ios_reason( ) == GLP_IHEUR and tree.ios_curr_node( ) == 1 :
 
-				for p in range( P ) :
+				tree.ios_heur_sol( { var.x( d , i , p ) : 0 if SRV[i] is None or SRV[i][0] != d or SRV[i][1] != p else 1 for d in range( D ) for i in range( N ) for p in range( P ) } )
 
-					if SRV[i] is None : val = 0
-
-					else :
-
-						_d , _p = SRV[i]
-
-						if d == _d and p == _p : val = 1
-
-						else : val = 0
-
-					lp.set_col_bnds( var.x( d , i , p ) , val , val )
-
-		solve( D , N , R , P , lp )
-
-		for d in range( D ) :
-
-			for i in range( N ) :
-
-				for p in range( P ) :
-
-					lp.set_col_bnds( var.x( d , i , p ) , None , None )
-
-					lp.set_col_kind( var.x( d , i , p ) , "binary" )
-
-	def solve ( D , N , R , P , lp ) :
+	def solve ( D , N , R , P , lp , cb = None ) :
 
 		var = Variables( D , N , R , P )
 
@@ -192,6 +170,8 @@ try :
 
 		iocp = glpk.IntOptControls() # (default) int. opt. control parameters
 		iocp.presolve = True
+
+		if cb : iocp.cb_func = cb
 
 		status = lp.intopt(iocp)
 

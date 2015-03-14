@@ -103,7 +103,9 @@ def dtcntr ( args , problem , affectations = None ) :
 
 	print( D , N , R , P , len(v) , len(w) , len(W) , len(ROW) , v , w , W , ROW )
 
-	lp = datacenter.problem( D , N , R , P , v , w , W , ROW )
+	lp = datacenter.problem( D , N , R , P , v , w , W , ROW , lb = args.lb , ub = args.ub )
+
+	cb = None
 
 	if affectations is not None :
 
@@ -124,13 +126,13 @@ def dtcntr ( args , problem , affectations = None ) :
 
 			SRV[i] = ( d , affectation.group )
 
-		datacenter.load( D , N , R , P , lp , SRV )
+		cb = datacenter.load( D , N , R , P , lp , SRV )
 
 
 
 	print( "problem constructed" )
 
-	datacenter.solve( D , N , R , P , lp )
+	datacenter.solve( D , N , R , P , lp , cb = cb )
 
 	print( "solved" )
 
@@ -305,6 +307,8 @@ def solve ( ) :
 	parser.add_argument( "-d" , "--destruct" , help = "% of destruction" , type = float , default = 0.05 )
 	parser.add_argument( "-m" , "--max" , help = "max size of servers" , type = int , default = 10000 )
 	parser.add_argument( "-c" , "--copy" , help = "keep copy with special name" , type = str , default = None )
+	parser.add_argument( "--lb" , help = "lower bound" , type = int , default = 0 )
+	parser.add_argument( "--ub" , help = "upper bound" , type = int , default = 500 )
 	args = parser.parse_args( )
 
 	# parse problem
