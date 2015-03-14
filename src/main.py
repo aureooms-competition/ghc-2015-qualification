@@ -3,8 +3,9 @@ import argparse
 import os.path
 import signal
 import sys
+import itertools
 
-from src import fd , action , parse , out , file
+from src import fd , action , parse , out , file , key
 
 from src.ascii import valid , warning , error
 
@@ -75,11 +76,27 @@ def knpsck ( args , problem ) :
 
 def dtcntr ( args , problem ) :
 
+	problem.intervals = sorted( problem.intervals , key = key.row )
+
 	D = len( problem.intervals )
 	N = len( problem.servers )
 	R = problem.R
 	P = problem.P
-	ROW = sorted( problem.intervals , key = lambda i : i.row )
+
+	ROW = [ [ ] for r in range ( R ) ]
+
+	i = 0
+
+	for k , g in itertools.groupby( problem.intervals , key.row ) :
+
+		g = list( g )
+
+		j = i + len( g )
+
+		ROW[k] = [ index for index in range( i , j ) ]
+
+		i = j
+
 	v = [ server.capacity for server in problem.servers ]
 	w = [ server.size for server in problem.servers ]
 	W = [ interval.size for interval in problem.intervals ]
