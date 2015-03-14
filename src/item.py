@@ -25,7 +25,7 @@ class Interval ( object ) :
 
 class Affectation ( object ) :
 
-	def __init__ ( self , server , interval , position , group = -1 ) :
+	def __init__ ( self , server , interval , position , group = 0 ) :
 
 		self.server = server
 		self.interval = interval

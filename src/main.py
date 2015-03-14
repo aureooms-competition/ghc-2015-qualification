@@ -12,7 +12,7 @@ from src import pivoting , neighborhood
 
 from src import knapsack
 
-from src.item import Solution
+from src.item import Affectation , Solution
 
 
 def firstfit ( args , problem ) :
@@ -48,7 +48,27 @@ def knpsck ( args , problem ) :
 
 	knapsack.solve( D , N , lp )
 
-	return [ ]
+	solution = knapsack.solution( D , N , lp )
+
+	affectations = [ ]
+
+	for interval in intervals :
+
+		available = interval.size
+
+		for server in servers :
+
+			if not next( solution ) : continue
+
+			available -= server.size
+
+			affectation = Affectation( server , interval , available )
+
+			affectations.append( affectation )
+
+	return affectations
+
+def noop ( args , problem , solution ) : return [ ]
 
 def localsearch ( args , problem , solution ) :
 
@@ -79,8 +99,9 @@ ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin , KNAPSACK : knpsck
 LOCALSEARCH = "ls"
 II = "ii"
 OPTIMIZE = "opt"
+NOOP = "noop"
 
-ALGORITHMS = { LOCALSEARCH : localsearch , II : ii , OPTIMIZE : optimize }
+ALGORITHMS = { LOCALSEARCH : localsearch , II : ii , OPTIMIZE : optimize , NOOP : noop }
 
 def solve ( ) :
 
@@ -97,6 +118,7 @@ def solve ( ) :
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
 	parser.add_argument( "-p" , "--pivoting" , help = "pivoting algorithm" , type = str , choices = pivoting.DICT , action = action.Dict )
 	parser.add_argument( "-n" , "--neighborhood" , help = "neighborhood" , type = str , choices = neighborhood.DICT , action = action.Dict )
+	parser.add_argument( "-w" , "--write" , help = "write last solution" , action = "store_true" )
 	args = parser.parse_args( )
 
 	# parse problem
@@ -162,6 +184,7 @@ def solve ( ) :
 	print( "Final score : %d" % objective )
 	print( "Final score : %d" % eval.all( R , P , affectations ) )
 
+	if args.write : out.write( R , S , P , M , affectations , objective )
 
 def validate ( ) :
 

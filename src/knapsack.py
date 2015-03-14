@@ -3,26 +3,36 @@ import ecyglpki as glpk
 
 def multidimensional ( D , N , v , w , W ) :
 
-	lp = glpk.Problem()
+	x = lambda d , i  : d * N + i + 1
 
-	lp.add_rows( D )
+	lp = glpk.Problem( )
 
-	for d in range( D ) :
+	lp.add_cols( D * N )
 
-		lp.set_row_bnds( d + 1 , None , W[d] )
-
-	lp.add_cols( N * D )
+	lp.add_rows( D + N )
 
 	for d in range( D ) :
 
 		for i in range( N ) :
 
-			x = d * N + i + 1
+			lp.set_col_kind( x( d , i ) , "binary" )
+			lp.set_obj_coef( x( d , i ) , v[i] )
 
-			lp.set_obj_coef( x , v[i] )
-			lp.set_col_kind( x , 'binary' )
+		mapping = { x( d , i ) : w[i] for i in range( N )  }
 
-			lp.set_mat_col( x , { d + 1 : w[i] for d in range( D ) } )
+		lp.set_mat_row( d + 1 , mapping )
+
+		lp.set_row_bnds( d + 1 , None , W[d] )
+
+	# a resource is used only once
+
+	for i in range( N ) :
+
+		mapping = { x( d , i ) : 1 for d in range( D ) }
+
+		lp.set_mat_row( D + i + 1 , mapping )
+
+		lp.set_row_bnds( D + i + 1 , None , 1 )
 
 	lp.set_obj_dir( 'maximize' )
 
@@ -30,6 +40,8 @@ def multidimensional ( D , N , v , w , W ) :
 
 
 def solve ( D , N , lp ) :
+
+	x = lambda d , i  : d * N + i + 1
 
 	# configure and solve
 
@@ -48,10 +60,8 @@ def solve ( D , N , lp ) :
 
 		for i in range( N ) :
 
-			x = d * N + i + 1
-
-			val = lp.mip_col_val( x )
-			lp.set_col_bnds( x , val , val )
+			val = lp.mip_col_val( x( d , i ) )
+			lp.set_col_bnds( x( d , i ) , val , val )
 
 	smcp = glpk.SimplexControls( ) # (default) simplex control parameters
 	smcp.presolve = True
@@ -68,3 +78,10 @@ def solve ( D , N , lp ) :
 		raise RuntimeError( 'Error while solving...: ' + status )
 
 	print( lp.get_obj_val( ) )
+
+
+def solution ( D , N , lp ) :
+
+	x = lambda d , i  : d * N + i + 1
+
+	return ( lp.mip_col_val( x( d , i ) ) for d in range( D ) for i in range( N ) )
