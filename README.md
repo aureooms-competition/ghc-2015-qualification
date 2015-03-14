@@ -26,6 +26,7 @@ will install Numpy, Cython and ecyglpki.
 	./solve in/dc.in -a roundrobin -r -A ls -l 200000 -s 1
 	./solve in/dc.in -a roundrobin -r -A ii -n sgc -p best
 	./solve in/dc.in -a roundrobin -r -A ii -n rgc -p firstandeq
+	./solve in/dc.in -a knapsack -A noop -w
 
 # validate it
 
