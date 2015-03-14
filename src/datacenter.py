@@ -150,6 +150,36 @@ try :
 		return lp
 
 
+	def load ( D , N , R , P , lp , SRV ) :
+
+		var = Variables( D , N , R , P )
+
+		for d in range( D ) :
+
+			for i in range( N ) :
+
+				for p in range( P ) :
+
+					_d , _p = SRV[i]
+
+					if d == _d and p == _p : val = 1
+
+					else : val = 0
+
+					lp.set_col_bnds( var.x( d , i , p ) , val , val )
+
+		solve( D , N , R , P , lp , SRV )
+
+		for d in range( D ) :
+
+			for i in range( N ) :
+
+				for p in range( P ) :
+
+					lp.set_col_bnds( var.x( d , i , p ) , None , None )
+
+					lp.set_col_kind( var.x( d , i , p ) , "binary" )
+
 	def solve ( D , N , R , P , lp ) :
 
 		var = Variables( D , N , R , P )
@@ -174,6 +204,9 @@ try :
 				for p in range( P ) :
 
 					val = lp.mip_col_val( var.x( d , i , p ) )
+
+					print( var.x( d , i , p ) , val )
+
 					lp.set_col_bnds( var.x( d , i , p ) , val , val )
 
 		smcp = glpk.SimplexControls( ) # (default) simplex control parameters
@@ -205,5 +238,5 @@ except ImportError as e :
 
 	def notify ( *args , **kwargs ) : raise _e
 
-	knapsack = solver = solution = notify
+	knapsack = solver = solution = load = notify
 

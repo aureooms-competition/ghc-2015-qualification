@@ -18,12 +18,12 @@ from src import knapsack , datacenter
 from src.item import Affectation , Solution
 
 
-def firstfit ( args , problem ) :
+def firstfit ( args , problem , affectations = None ) :
 
 	return solver.firstfit( problem.servers , problem.intervals , iterations = args.firstfit )
 
 
-def roundrobin ( args , problem ) :
+def roundrobin ( args , problem , affectations = None ) :
 
 	servers = sorted( problem.servers , key = lambda x : x.capacity / x.size , reverse = True )
 
@@ -39,7 +39,7 @@ def roundrobin ( args , problem ) :
 
 	return sum( affectations , [ ] )
 
-def knpsck ( args , problem ) :
+def knpsck ( args , problem , affectations = None ) :
 
 	D = len( problem.intervals )
 	N = len( problem.servers )
@@ -74,7 +74,7 @@ def knpsck ( args , problem ) :
 	return affectations
 
 
-def dtcntr ( args , problem ) :
+def dtcntr ( args , problem , affectations = None ) :
 
 	problem.intervals = sorted( problem.intervals , key = key.row )
 
@@ -104,6 +104,28 @@ def dtcntr ( args , problem ) :
 	print( D , N , R , P , len(v) , len(w) , len(W) , len(ROW) , v , w , W , ROW )
 
 	lp = datacenter.problem( D , N , R , P , v , w , W , ROW )
+
+	if affectations is not None :
+
+		SRV = [ None ] * N
+
+		ins = problem.intervals
+
+		for i , server in enumerate( problem.servers ) :
+
+			affectation = next( filter( lambda a : a.server.id == server.id , affectations ) , None )
+
+			if affectation is None : continue
+
+			st = affectation.interval.start
+
+			d = next( ( d for ( d , _ ) in enumerate( ins ) if _.start == st ) , None )
+
+			SRV[i] = ( d , affectation.group )
+
+		datacenter.load( D , N , R , P , lp , SRV )
+
+
 
 	print( "problem constructed" )
 
@@ -267,7 +289,7 @@ def solve ( ) :
 
 	parser = argparse.ArgumentParser( )
 	parser.add_argument( "input" , help = "input file" , type = str )
-	parser.add_argument( "--solution" , help = "existing solution to optimize" , type = str )
+	parser.add_argument( "--load" , help = "existing solution to optimize" , type = str )
 	parser.add_argument( "-a" , "--allocator" , help = "allocator to use" , type = str , choices = ALLOCATORS , action = action.Dict )
 	parser.add_argument( "-i" , "--init" , help = "initializator to use" , type = str , choices = init.DICT , action = action.Dict , default = init.noop )
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
@@ -295,24 +317,25 @@ def solve ( ) :
 
 	# initial solution
 
-	if args.solution is None :
+	affectations = None
 
-		problem.servers = list( filter( lambda s : s.capacity <= args.max , problem.servers ) )
-
-		# NOTE keep M unchanged for output
-
-		problem.M = len( problem.servers )
-
-		affectations = args.allocator( args , problem )
-
-		print( "Servers : %d , Affectations : %d"  % ( problem.M , len( affectations ) ) )
-
-		args.init( args , problem , affectations )
-
-	else :
+	if args.load is not None :
 
 		additional = ( None , { "problem" : problem } )
-		affectations = file.read( args.solution , parse.affectations , parse.solution , additional = additional )
+		affectations = file.read( args.load , parse.affectations , parse.solution , additional = additional )
+
+	problem.servers = list( filter( lambda s : s.capacity <= args.max , problem.servers ) )
+
+	# NOTE keep M unchanged for output
+
+	problem.M = len( problem.servers )
+
+	affectations = args.allocator( args , problem , affectations )
+
+	print( "Servers : %d , Affectations : %d"  % ( problem.M , len( affectations ) ) )
+
+	args.init( args , problem , affectations )
+
 
 	# compute maximal possible score using this server affectation
 
