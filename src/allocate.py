@@ -129,4 +129,3 @@ def recycle ( R , recycled , tourniquet , available , affectations ) :
 			else : recycled.append( server )
 
 	return recycled
-

@@ -1,4 +1,44 @@
+from src import eval
 
+class Walk ( object) :
+
+	def __init__ ( self , problem ) : pass
+
+	def __call__ ( self , solution ) :
+
+		affectations = solution.affectations
+
+		for ax in affectations :
+
+			for ay in affectations :
+
+				if ax.server.capacity == ay.server.capacity :
+
+					yield ax , ay
+
+class Eval ( object ) :
+
+	def __init__ ( self , problem ) : pass
+
+	def __call__ ( self , solution , mutation ) :
+
+		ax , ay = mutation
+
+		apply( solution , ( ax , ay ) )
+
+		obj = eval.objective( solution.groups , solution.rows )
+
+		apply( solution , ( ay , ax ) )
+
+		return obj
+
+class Apply ( object ) :
+
+	def __init__ ( self , problem ) : pass
+
+	def __call__ ( self , solution , mutation ) :
+
+		apply( solution , mutation )
 
 def apply ( solution , mutation ) :
 

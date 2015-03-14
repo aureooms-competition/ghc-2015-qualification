@@ -10,7 +10,7 @@ from src.ascii import valid , warning , error
 
 from src import init , allocate , solver , optimizer , eval
 
-from src import pivoting , neighborhood
+from src import pivoting , neighborhood , destruct
 
 from src import knapsack
 
@@ -45,6 +45,8 @@ def knpsck ( args , problem ) :
 	v = [ server.capacity for server in problem.servers ]
 	w = [ server.size for server in problem.servers ]
 	W = [ interval.size for interval in problem.intervals ]
+
+	print( D , N , len(v) , len(w) , len(W) , v , w , W )
 
 	lp = knapsack.multidimensional( D , N , v , w , W )
 
@@ -102,6 +104,56 @@ def optimize ( args , problem , solution ) :
 
 			yield solution
 
+def ig ( args , problem , solution ) :
+
+	wait = args.wait
+
+	while True :
+
+		solution.groups , solution.rows = eval.tableau( problem.R , problem.P , solution.affectations )
+		solution.objective = current = eval.objective( solution.groups , solution.rows )
+
+		print( current )
+
+		localsearch = solver.ii(
+			solution ,
+			args.pivoting ,
+			args.neighborhood.Walk( problem ) ,
+			args.neighborhood.Eval( problem ) ,
+			args.neighborhood.Apply( problem )
+		)
+
+		greedy2 = optimizer.optimize2 ( problem.R , problem.P , solution )
+		greedy3 = optimizer.optimize3 ( problem.R , problem.P , solution )
+
+		for step in localsearch , greedy2 , greedy3 :
+
+			i = 0
+
+			while i < wait :
+
+				next( step )
+
+				if solution.objective > current :
+
+					current = solution.objective
+
+					print( current )
+
+					yield solution
+
+					i = 0
+
+				i += 1
+
+		print( current )
+
+		destruct.swap( solution , args.destruct )
+
+		destruct.assign( problem.P , solution , args.destruct )
+
+
+
 def optimize1 ( args , problem , solution ) :
 
 	return optimizer.optimize1( problem.R , problem.P , solution )
@@ -123,6 +175,7 @@ ALLOCATORS = { FIRSTFIT : firstfit , ROUNDROBIN : roundrobin , KNAPSACK : knpsck
 
 LOCALSEARCH = "ls"
 II = "ii"
+IG = "ig"
 OPT = "opt"
 OPT1 = "opt1"
 OPT2 = "opt2"
@@ -132,6 +185,7 @@ NOOP = "noop"
 ALGORITHMS = {
 	LOCALSEARCH : localsearch ,
 	II : ii ,
+	IG : ig ,
 	OPT  : optimize ,
 	OPT1 : optimize1 ,
 	OPT2 : optimize2 ,
@@ -150,11 +204,15 @@ def solve ( ) :
 	parser.add_argument( "-r" , "--recycle" , help = "recycle unused servers" , action = "store_true" )
 	parser.add_argument( "-f" , "--firstfit" , help = "# of iterations for first fit" , type = int , default = 100 )
 	parser.add_argument( "-l" , "--localsearch" , help = "# of iterations for local search" , type = int , default = 100 )
-	parser.add_argument( "-A" , "--algorithm" , help = "algorithm" , type = str , choices = ALGORITHMS , required = True , action = action.Dict )
+	parser.add_argument( "-A" , "--algorithm" , help = "algorithm" , type = str , choices = ALGORITHMS , action = action.Dict , default =  noop )
 	parser.add_argument( "-s" , "--swaps" , help = "# of items swapped at each iteration of the local search" , type = int , default = 2 )
 	parser.add_argument( "-p" , "--pivoting" , help = "pivoting algorithm" , type = str , choices = pivoting.DICT , action = action.Dict )
 	parser.add_argument( "-n" , "--neighborhood" , help = "neighborhood" , type = str , choices = neighborhood.DICT , action = action.Dict )
-	parser.add_argument( "-w" , "--write" , help = "write last solution" , action = "store_true" )
+	parser.add_argument( "--write" , help = "write last solution" , action = "store_true" )
+	parser.add_argument( "-w" , "--wait" , help = "# of unsuccessfull iterations before destruct" , type = int , default = 100 )
+	parser.add_argument( "-d" , "--destruct" , help = "% of destruction" , type = float , default = 0.05 )
+	parser.add_argument( "-m" , "--max" , help = "max size of servers" , type = int , default = 10000 )
+	parser.add_argument( "-c" , "--copy" , help = "keep copy with special name" , type = str , default = None )
 	args = parser.parse_args( )
 
 	# parse problem
@@ -169,6 +227,10 @@ def solve ( ) :
 	# initial solution
 
 	if args.solution is None :
+
+		problem.servers = list( filter( lambda s : s.capacity <= args.max , problem.servers ) )
+
+		M = problem.M = len( problem.servers )
 
 		affectations = args.allocator( args , problem )
 
@@ -202,7 +264,7 @@ def solve ( ) :
 
 		def handler ( signal , frame ) :
 
-			out.write( R , S , P , M , solution.affectations , solution.objective )
+			out.write( R , S , P , M , solution.affectations , solution.objective , copy = args.copy )
 
 			sys.exit( 0 )
 
@@ -220,9 +282,9 @@ def solve ( ) :
 
 			if out.improves( best ) :
 
-				out.write( R , S , P , M , affectations , best )
+				out.write( R , S , P , M , affectations , best , copy = args.copy )
 
-			print( best )
+			print( "[IMPROVED] %d" % best )
 
 	affectations = solution.affectations
 	objective = solution.objective
@@ -230,7 +292,7 @@ def solve ( ) :
 	print( "Final score : %d" % objective )
 	print( "Final score : %d" % eval.all( R , P , affectations ) )
 
-	if args.write : out.write( R , S , P , M , affectations , objective )
+	if args.write : out.write( R , S , P , M , affectations , objective , copy = args.copy )
 
 def validate ( ) :
 

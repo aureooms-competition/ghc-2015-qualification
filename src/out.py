@@ -38,7 +38,7 @@ def improves ( obj ) :
 	return obj > max( solutions )
 
 
-def write ( R , S , P , M , affectations , objective ) :
+def write ( R , S , P , M , affectations , objective , copy = None ) :
 
 	if not M : return
 
@@ -46,40 +46,48 @@ def write ( R , S , P , M , affectations , objective ) :
 
 	hash = blueprint( R , S , P , affectations )
 
-	with open( "{0}/{1}-{2:x}".format( OUT , objective , hash )  , "w" ) as f :
+	names = [ "{0}/{1}-{2:x}".format( OUT , objective , hash ) ]
 
-		j = 0
-		A = len( affectations )
+	if copy is not None :
 
-		fmt = "%d %d %d\n"
-		notused = "x\n"
+		names.append( "{0}/{1}-{2}".format( OUT , objective , copy ) )
 
-		i = 0
+	for name in names :
 
-		while i < M :
+		with open( name , "w" ) as f :
 
-			if j >= A : break
+			j = 0
+			A = len( affectations )
 
-			affectation = affectations[j]
+			fmt = "%d %d %d\n"
+			notused = "x\n"
 
-			if affectation.server.id == i :
+			i = 0
 
-				position = affectation.interval.start + affectation.position
-				row = affectation.interval.row
-				group = affectation.group
+			while i < M :
 
-				line = fmt % ( row , position , group )
-				j += 1
+				if j >= A : break
 
-			else : line = notused
+				affectation = affectations[j]
 
-			f.write( line )
+				if affectation.server.id == i :
 
-			i += 1
+					position = affectation.interval.start + affectation.position
+					row = affectation.interval.row
+					group = affectation.group
+
+					line = fmt % ( row , position , group )
+					j += 1
+
+				else : line = notused
+
+				f.write( line )
+
+				i += 1
 
 
-		while i < M :
+			while i < M :
 
-			f.write( notused )
-			i += 1
+				f.write( notused )
+				i += 1
 
