@@ -3,6 +3,7 @@
 #include <fstream>
 #include <glpk.h>
 
+static const char* ON = "1" ;
 static char* input ;
 static char* output ;
 static int D , N , R , P , LB , UB , C ;
@@ -13,6 +14,18 @@ static int* w = NULL ;
 static int* W = NULL ;
 static int* LEN = NULL ;
 static int** ROW = NULL ;
+
+static int fp_heur ;
+static int gmi_cuts ;
+static int mir_cuts ;
+static int cov_cuts ;
+static int clq_cuts ;
+
+typedef void (*cb)( glp_tree* , void* ) ;
+
+static cb cb_func = NULL ;
+
+static int tm_lim ;
 
 void clean ( ) {
 
@@ -297,6 +310,16 @@ void problem ( ) {
 
 }
 
+void refresh ( glp_tree* tree , void* ) {
+
+	if ( glp_ios_reason( tree ) == GLP_IHEUR ) {
+
+		glp_ios_heur_sol( tree , SOL ) ;
+
+	}
+
+}
+
 void load ( glp_tree* tree , void* ) {
 
 	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
@@ -313,12 +336,13 @@ void solve ( ) {
 	glp_iocp iocp ;
 	glp_init_iocp( &iocp ) ;
 	iocp.presolve = true ;
-	iocp.cb_func = load ;
-	iocp.fp_heur = GLP_ON ;
-	iocp.gmi_cuts = GLP_ON ;
-	iocp.mir_cuts = GLP_ON ;
-	iocp.cov_cuts = GLP_ON ;
-	iocp.clq_cuts = GLP_ON ;
+	iocp.cb_func = cb_func ;
+	iocp.fp_heur = fp_heur ;
+	iocp.gmi_cuts = gmi_cuts ;
+	iocp.mir_cuts = mir_cuts ;
+	iocp.cov_cuts = cov_cuts ;
+	iocp.clq_cuts = clq_cuts ;
+	iocp.tm_lim = tm_lim ;
 
 	int status ;
 
@@ -477,15 +501,39 @@ void out ( ) {
 
 }
 
+int flag ( char* arg ) {
+
+	return arg[0] == ON ? GLP_ON : GLP_OFF ;
+
+}
+
 int main ( int argc , char** argv ) {
 
-	if ( argc < 3 ) {
-		std::cout << "<input> <output>" << std::endl ;
+	if ( argc < 10 ) {
+		std::cout << "<input> <output> <fp_heur> <gmi_cuts> <mir_cuts> <cov_cuts> <clq_cuts> <cb_func> <tm_lim>" << std::endl ;
 		exit( -1 ) ;
 	}
 
 	input = argv[1] ;
 	output = argv[2] ;
+
+	fp_heur = flag( argv[3] ) ;
+	gmi_cuts = flag( argv[4] ) ;
+	mir_cuts = flag( argv[5] ) ;
+	cov_cuts = flag( argv[6] ) ;
+	clq_cuts = flag( argv[7] ) ;
+	cb_func = argv[8][0] == ON ? refresh : load ;
+	tm_lim = std::stoi( argv[9] )
+
+	std::cout << "<input> " << input << std::endl ;
+	std::cout << "<output> " << output << std::endl ;
+	std::cout << "<fp_heur> " << fp_heur << std::endl ;
+	std::cout << "<gmi_cuts> " << gmi_cuts << std::endl ;
+	std::cout << "<mir_cuts> " << mir_cuts << std::endl ;
+	std::cout << "<cov_cuts> " << cov_cuts << std::endl ;
+	std::cout << "<clq_cuts> " << clq_cuts << std::endl ;
+	std::cout << "<cb_func> " << cb_func << std::endl ;
+	std::cout << "<tm_lim> " << tm_lim << std::endl ;
 
 	std::cout << "reading input" << std::endl ;
 	in( ) ;
