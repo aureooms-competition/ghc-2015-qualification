@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include <glpk.h>
 
 class Variables {
@@ -284,66 +285,74 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int[
 
 }
 
-def load ( D , N , R , P , lp , SRV ) :
+static double SOL* ;
 
-	var = Variables( D , N , R , P )
+void load ( glp_tree* tree , void* info ) {
 
-	def cb ( tree , info ) :
+	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
 
-		if tree.ios_reason( ) == GLP_IHEUR and tree.ios_curr_node( ) == 1 :
+		glp_ios_heur_sol( tree , SOL ) ;
 
-			tree.ios_heur_sol( { var.x( d , i , p ) : 0 if SRV[i] is None or SRV[i][0] != d or SRV[i][1] != p else 1 for d in range( D ) for i in range( N ) for p in range( P ) } )
+	}
 
-	return cb
+}
 
-def solve ( D , N , R , P , lp , cb = None ) :
 
-	var = Variables( D , N , R , P )
+void solve ( const int D , const int N , const int R , const int P , glp_prob* lp ) {
 
-	# configure and solve
+	Variables var ( D , N , R , P ) ;
 
-	iocp = glpk.IntOptControls() # (default) int. opt. control parameters
-	iocp.presolve = True
+	glp_iocp iocp ;
+	glp_init_iocp( &iocp ) ;
+	iocp.presolve = true ;
+	iocp.cb_func = load ;
 
-	if cb : iocp.cb_func = cb
+	int status = glp_intopt( lp , &iocp ) ;
 
-	status = glp_intopt(iocp)
+	if ( status != 0 ) {
+		std::cout << "Error while solving...: " << status << std::endl ;
+		exit( status ) ;
+	}
 
-	if status != 'optimal' :
-		raise RuntimeError( 'Error while solving...: ' + status )
+	for ( int d = 0 ; d < D ; ++d ) {
 
-	# fix the binary variable to its compute
-	# value and find exact solution
-
-	for d in range( D ) :
-
-		for i in range( N ) :
+		for ( int i = 0 ; i < N ; ++i ) {
 
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				val = glp_mip_col_val( var.x( d , i , p ) )
+				double val = glp_mip_col_val( lp , var.x( d , i , p ) ) ;
 
-				glp_set_col_bnds( var.x( d , i , p ) , val , val )
+				glp_set_col_bnds( lp , var.x( d , i , p ) , GLP_FX , val , val ) ;
 
-	smcp = glpk.SimplexControls( ) # (default) simplex control parameters
-	smcp.presolve = True
+			}
+		}
+	}
 
-	status = glp_simplex(smcp)  # solve
+	glp_smcp smcp ;
+	glp_init( &smcp ) ;
+	smcp.presolve = true ;
 
-	if status != 'optimal' :
-		raise RuntimeError( 'Error while solving...: ' + status )
+	int status = glp_simplex( lp , &smcp ) ;
 
-	smcp.presolve = False
-	status = glp_exact(smcp)  # now solve exactly
+	if ( status != 0 ) {
+		std::cout << "Error while solving...: " << status << std::endl ;
+		exit( status ) ;
+	}
 
-	if status != 'optimal' :
-		raise RuntimeError( 'Error while solving...: ' + status )
+	smcp.presolve = false ;
+	int status = glp_exact( lp , &smcp ) ;
 
-	print( glp_get_obj_val( ) )
+	if ( status != 0 ) {
+		std::cout << "Error while solving...: " << status << std::endl ;
+		exit( status ) ;
+	}
 
+	 std::cout << glp_get_obj_val( lp ) std::endl ;
 
-def solution ( D , N , R , P , lp ) :
+}
 
-	var = Variables( D , N , R , P )
+int main ( int argc , char[][] argv ) {
 
-	return ( glp_mip_col_val( var.x( d , i , p ) ) for d in range( D ) for i in range( N ) for p in range( P ) )
+	std::cout << "Hello, world!" << std::endl ;
+
+}
