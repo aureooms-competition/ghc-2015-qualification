@@ -458,3 +458,158 @@ def validate ( ) :
 				if used > authorized :
 
 					error( "[INFEASIBLE] Row %d , slot %d , used %d > %d times" % ( r , i , used , authorized ) )
+
+
+def mip ( ) :
+
+	# parse args
+
+	parser = argparse.ArgumentParser( )
+	parser.add_argument( "input" , help = "input file" , type = str )
+	parser.add_argument( "solution" , help = "solution file" , type = str )
+	parser.add_argument( "mip" , help = "mip file" , type = str )
+	args = parser.parse_args( )
+
+	# parse problem
+
+	problem = file.read( args.input , parse.tokenize , parse.problem )
+
+	R = problem.R
+	S = problem.S
+	P = problem.P
+	M = problem.M
+
+	# validate solutions
+
+	additional = ( None , { "problem" : problem } )
+
+	affectations = file.read( solution , parse.affectations , parse.solution , additional = additional )
+
+	groups , rows = eval.tableau( R , P , affectations )
+
+	objective = eval.objective( groups , rows )
+
+	problem.intervals = sorted( problem.intervals , key = key.row )
+
+	D = len( problem.intervals )
+	N = len( problem.servers )
+
+	ROW = [ [ ] for r in range ( R ) ]
+
+	i = 0
+
+	for k , g in itertools.groupby( problem.intervals , key.row ) :
+
+		g = list( g )
+
+		j = i + len( g )
+
+		ROW[k] = [ index for index in range( i , j ) ]
+
+		i = j
+
+	v = [ server.capacity for server in problem.servers ]
+	w = [ server.size for server in problem.servers ]
+	W = [ interval.size for interval in problem.intervals ]
+
+	LEN = [ len( ROW[r] ) for r in range( R ) ]
+
+	with open( args.mip , 'w' ) as f :
+
+		_ = lambda v : f.write( v + "\n" )
+
+		_( D )
+		_( N )
+		_( R )
+		_( P )
+		_( 0 )
+		_( 500 )
+
+		for i in range( N ) :
+			_( v[i] )
+			_( w[i] )
+
+		for d in range( D ) :
+			_( W[d] )
+
+		for r in range( R ) :
+			_( LEN[r] )
+
+		for r in range( R ) :
+			for _d in range( LEN[r] ) :
+				_( ROW[r][_d] )
+
+		_( objective )
+
+		for g in eval.guaranteed( groups , rows ) :
+
+			_( g )
+
+		for a in groups :
+
+			_( a )
+
+		for r in range( R ) :
+
+			for p in range( P ) :
+
+				_( rows[r][g] )
+
+
+		affectations = iter( sorted( affectations , key.affectation ) )
+
+		affectation = next( affectations , None )
+
+		for d in range( D ) :
+			for i in range( N ) :
+				for p in range( P ) :
+
+					x = 1
+
+					if affectation is None : x = 0
+					elif affectation.server.id != i : x = 0
+					elif affectation.interval.id != d : x = 0
+					elif affectation.group != p : x = 0
+					else : affectation = next( affectations , None )
+
+					_( x )
+
+def sol ( ) :
+
+	parser = argparse.ArgumentParser( )
+	parser.add_argument( "input" , help = "input file" , type = str )
+	parser.add_argument( "solution" , help = "solution file" , type = str )
+	parser.add_argument( "mip" , help = "mip file" , type = str )
+	args = parser.parse_args( )
+
+	problem = file.read( args.input , parse.tokenize , parse.problem )
+
+	R = problem.R
+	S = problem.S
+	P = problem.P
+	M = problem.M
+
+	# ...
+
+	solution = datacenter.solution( D , N , R , P , lp )
+
+	affectations = [ ]
+
+	for interval in problem.intervals :
+
+		available = interval.size
+
+		for server in problem.servers :
+
+			for group in range( P ) :
+
+				if not next( solution ) : continue
+
+				available -= server.size
+
+				affectation = Affectation( server , interval , available , group )
+
+				affectations.append( affectation )
+
+	return affectations
+

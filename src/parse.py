@@ -39,6 +39,8 @@ def problem ( tokens ) :
 
 		rows[r][s] = False
 
+	id = 0
+
 	for r , row in enumerate( rows ) :
 
 		# generate intervals for each row
@@ -57,9 +59,11 @@ def problem ( tokens ) :
 
 			if size > 0 :
 
-				interval = Interval( r , j , size )
+				interval = Interval( id , r , j , size )
 
 				intervals.append( interval )
+
+				id += 1
 
 			while i < S and not row[i] :
 

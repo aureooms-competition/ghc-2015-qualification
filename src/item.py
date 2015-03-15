@@ -13,8 +13,9 @@ class Server ( object ) :
 
 class Interval ( object ) :
 
-	def __init__ ( self , row , start , size ) :
+	def __init__ ( self , id , row , start , size ) :
 
+		self.id = id
 		self.row = row
 		self.start = start
 		self.size = size

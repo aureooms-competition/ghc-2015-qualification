@@ -30,3 +30,7 @@ def position ( item ) :
 def second ( item ) :
 
 	return item[1]
+
+def affectation ( item ) :
+
+	return ( item.interval.id , item.server.id , item.group )
