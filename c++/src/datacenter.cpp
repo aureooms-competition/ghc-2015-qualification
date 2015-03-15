@@ -1,65 +1,79 @@
 
 #include <iostream>
+#include <fstream>
 #include <glpk.h>
 
-class Variables {
+static char* input ;
+static char* output ;
+static int D , N , R , P , LB , UB , C ;
+static double* SOL = NULL ;
+static glp_prob* lp = NULL ;
+static int* v = NULL ;
+static int* w = NULL ;
+static int* W = NULL ;
+static int* LEN = NULL ;
+static int** ROW = NULL ;
 
-public:
+void clean ( ) {
 
-	const int D ;
-	const int N ;
-	const int R ;
-	const int P ;
+	delete[] SOL ;
+	delete[] v ;
+	delete[] w ;
+	delete[] W ;
+	delete[] LEN ;
 
-	Variables ( const int D , const int N , const int R , const int P ) : D(D) , N(N) , R(R) , P(P) { }
-
-	int Z ( ) {
-		return 1 ;
+	for ( int r = 0 ; r < R ; ++r ) {
+		delete[] ROW[r] ;
 	}
 
-	int g ( int p ) {
-		return ( this->Z( ) + 1 ) + p ;
-	}
+	delete[] ROW ;
 
-	int a ( int p ) {
-		return this->g( this->P ) + p ;
-	}
+}
 
-	int s ( int r , int p ) {
-		return this->a( this->P ) + r * this->P + p ;
-	}
+int Z ( ) {
+	return 1 ;
+}
 
-	int x ( int d , int i , int p ) {
-		return this->s( this->R , 0 ) + ( d * this->N + i ) * this->P + p ;
-	}
+int g ( int p ) {
+	return ( Z( ) + 1 ) + p ;
+}
 
-	int size ( ) {
-		return this->x( this->D - 1 , this->N - 1 , this->P - 1 ) ;
-	}
+int a ( int p ) {
+	return g( P ) + p ;
+}
 
-} ;
+int s ( int r , int p ) {
+	return a( P ) + r * P + p ;
+}
 
-glp_prob* problem ( const int D , const int N , const int R , const int P , int* v , int* w , int* W , int* LEN , int** ROW , int lb , int ub ) {
+int x ( int d , int i , int p ) {
+	return s( R , 0 ) + ( d * N + i ) * P + p ;
+}
 
-	Variables var ( D , N , R , P ) ;
+int columns ( ) {
+	return x( D - 1 , N - 1 , P - 1 ) ;
+}
 
-	glp_prob* lp = glp_create_prob( ) ;
 
-	glp_add_cols( lp , var.size( ) ) ;
+void problem ( ) {
+
+	lp = glp_create_prob( ) ;
+
+	glp_add_cols( lp , C ) ;
 
 	glp_add_rows( lp , ( D + N ) + ( P + R * P ) + ( P + R * P ) ) ;
 
 	glp_set_obj_dir( lp , GLP_MAX ) ;
 
-	glp_set_obj_coef( lp , var.Z( ) , 1 ) ;
+	glp_set_obj_coef( lp , Z( ) , 1 ) ;
 
-	glp_set_col_bnds( lp , var.Z( ) , GLP_DB , lb , ub ) ;
+	glp_set_col_bnds( lp , Z( ) , GLP_DB , LB , UB ) ;
 
 	for ( int d = 0 ; d < D ; ++d ) {
 		for ( int i = 0 ; i < N ; ++i ) {
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				glp_set_col_kind( lp , var.x( d , i , p ) , GLP_BV ) ;
+				glp_set_col_kind( lp , x( d , i , p ) , GLP_BV ) ;
 
 			}
 		}
@@ -79,7 +93,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 		for ( int i = 0 ; i < N ; ++i ) {
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				ind[j] = var.x( d , i , p ) ;
+				ind[j] = x( d , i , p ) ;
 				val[j] = w[i] ;
 
 				j += 1 ;
@@ -109,7 +123,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 		for ( int d = 0 ; d < D ; ++d ) {
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				ind[j] = var.x( d , i , p ) ;
+				ind[j] = x( d , i , p ) ;
 				val[j] = 1 ;
 
 				j += 1 ;
@@ -136,7 +150,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 		int j = 1 ;
 
-		ind[j] = var.a( p ) ;
+		ind[j] = a( p ) ;
 		val[j] = -1 ;
 
 		j += 1 ;
@@ -144,7 +158,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 		for ( int d = 0 ; d < D ; ++d ) {
 			for ( int i = 0 ; i < N ; ++i ) {
 
-				ind[j] = var.x( d , i , p ) ;
+				ind[j] = x( d , i , p ) ;
 				val[j] = v[i] ;
 
 				j += 1 ;
@@ -159,7 +173,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 		glp_set_row_bnds( lp , k , GLP_FX , 0 , 0 ) ;
 
-		glp_set_col_bnds( lp , var.a( p ) , GLP_LO , 0 , -1 ) ;
+		glp_set_col_bnds( lp , a( p ) , GLP_LO , 0 , -1 ) ;
 
 		k += 1 ;
 
@@ -175,7 +189,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 			int j = 1 ;
 
-			ind[j] = var.s( r , p ) ;
+			ind[j] = s( r , p ) ;
 			val[j] = -1 ;
 
 			j += 1 ;
@@ -186,7 +200,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 				for ( int i = 0 ; i < N ; ++i ) {
 
-					ind[j] = var.x( d , i , p ) ;
+					ind[j] = x( d , i , p ) ;
 					val[j] = v[i] ;
 
 					j += 1 ;
@@ -217,12 +231,12 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 		int j = 1 ;
 
-		ind[j] = var.Z( ) ;
+		ind[j] = Z( ) ;
 		val[j] = -1 ;
 
 		j += 1 ;
 
-		ind[j] = var.g( p ) ;
+		ind[j] = g( p ) ;
 		val[j] = 1 ;
 
 		j += 1 ;
@@ -234,7 +248,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 		glp_set_row_bnds( lp , k , GLP_LO , 0 , -1 ) ;
 
-		glp_set_col_bnds( lp , var.g( p ) , GLP_LO , 0 , -1 ) ;
+		glp_set_col_bnds( lp , g( p ) , GLP_LO , 0 , -1 ) ;
 
 		k += 1 ;
 
@@ -251,17 +265,17 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 			int j = 1 ;
 
-			ind[j] = var.g( p ) ;
+			ind[j] = g( p ) ;
 			val[j] = -1 ;
 
 			j += 1 ;
 
-			ind[j] = var.a( p ) ;
+			ind[j] = a( p ) ;
 			val[j] = 1 ;
 
 			j += 1 ;
 
-			ind[j] = var.s( r , p ) ;
+			ind[j] = s( r , p ) ;
 			val[j] = -1 ;
 
 			j += 1 ;
@@ -273,7 +287,7 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 			glp_set_row_bnds( lp , k , GLP_LO , 0 , -1 ) ;
 
-			glp_set_col_bnds( lp , var.s( r , p ) , GLP_LO , 0 , -1 ) ;
+			glp_set_col_bnds( lp , s( r , p ) , GLP_LO , 0 , -1 ) ;
 
 			k += 1 ;
 
@@ -281,13 +295,9 @@ glp_prob* problem ( const int D , const int N , const int R , const int P , int*
 
 	}
 
-	return lp ;
-
 }
 
-static double* SOL = NULL;
-
-void load ( glp_tree* tree , void* info ) {
+void load ( glp_tree* tree , void* ) {
 
 	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
 
@@ -298,9 +308,7 @@ void load ( glp_tree* tree , void* info ) {
 }
 
 
-void solve ( const int D , const int N , const int R , const int P , glp_prob* lp ) {
-
-	Variables var ( D , N , R , P ) ;
+void solve ( ) {
 
 	glp_iocp iocp ;
 	glp_init_iocp( &iocp ) ;
@@ -322,9 +330,9 @@ void solve ( const int D , const int N , const int R , const int P , glp_prob* l
 
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				double val = glp_mip_col_val( lp , var.x( d , i , p ) ) ;
+				double val = glp_mip_col_val( lp , x( d , i , p ) ) ;
 
-				glp_set_col_bnds( lp , var.x( d , i , p ) , GLP_FX , val , val ) ;
+				glp_set_col_bnds( lp , x( d , i , p ) , GLP_FX , val , val ) ;
 
 			}
 		}
@@ -353,8 +361,103 @@ void solve ( const int D , const int N , const int R , const int P , glp_prob* l
 
 }
 
+void in ( ) {
+
+	std::ifstream ifs ( input , std::ifstream::in ) ;
+
+	ifs >> D >> N >> R >> P >> LB >> UB ;
+
+	C = columns( ) ;
+
+	for ( int i = 0 ; i < N ; ++i ) {
+		ifs >> v[i] >> w[i] ;
+	}
+
+	for ( int d = 0 ; d < D ; ++d ) {
+		ifs >> W[d] ;
+	}
+
+	LEN = new int[R] ;
+
+	for ( int r = 0 ; r < R ; ++r ) {
+		ifs >> LEN[r] ;
+	}
+
+	ROW = new int*[R] ;
+
+	for ( int r = 0 ; r < R ; ++r ) {
+
+		int _D = LEN[r] ;
+		ROW[r] = new int[_D] ;
+
+		for ( int _d = 0 ; _d < _D ; ++_d ) {
+			ifs >> ROW[r][_d] ;
+		}
+
+	}
+
+	SOL = new double[C + 1] ;
+
+	for ( int c = 1 ; c <= C ; ++c ) {
+		ifs >> SOL[c] ;
+	}
+
+	ifs.close( ) ;
+
+}
+
+void out ( ) {
+
+	std::ofstream ofs ( output , std::ofstream::out ) ;
+
+	const char* n = "\n" ;
+
+	ofs << D << n << N << n << R << n << P << n << LB << n << UB << n ;
+
+	for ( int i = 0 ; i < N ; ++i ) {
+		ofs << v[i] << n << w[i] << n ;
+	}
+
+	for ( int d = 0 ; d < D ; ++d ) {
+		ofs << W[d] << n ;
+	}
+
+	for ( int r = 0 ; r < R ; ++r ) {
+		ofs << LEN[r] << n ;
+	}
+
+	for ( int r = 0 ; r < R ; ++r ) {
+
+		int _D = LEN[r] ;
+
+		for ( int _d = 0 ; _d < _D ; ++_d ) {
+			ofs << ROW[r][_d] << n ;
+		}
+
+	}
+
+	for ( int c = 1 ; c <= C ; ++c ) {
+		ofs << SOL[c] << n ;
+	}
+
+	ofs.close( ) ;
+
+}
+
 int main ( int argc , char** argv ) {
 
-	std::cout << "Hello, world!" << std::endl ;
+	if ( argc < 3 ) {
+		std::cout << "<input> <output>" << std::endl ;
+		exit( -1 ) ;
+	}
+
+	input = argv[1] ;
+	output = argv[2] ;
+
+	in( ) ;
+	// problem( ) ;
+	// solve( ) ;
+	out( ) ;
+	clean( ) ;
 
 }
