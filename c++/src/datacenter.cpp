@@ -301,7 +301,19 @@ void load ( glp_tree* tree , void* ) {
 
 	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
 
-		glp_ios_heur_sol( tree , SOL ) ;
+		std::cout << "loading existing solution" << std::endl ;
+
+		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
+
+			std::cout << "existing solution accepted" << std::endl ;
+
+		}
+
+		else {
+
+			std::cout << "existing solution rejected" << std::endl ;
+
+		}
 
 	}
 
@@ -314,11 +326,11 @@ void solve ( ) {
 	glp_init_iocp( &iocp ) ;
 	iocp.presolve = true ;
 	iocp.cb_func = load ;
-	iocp.fp_heur = GLP_ON ;
-	iocp.gmi_cuts = GLP_ON ;
-	iocp.mir_cuts = GLP_ON ;
-	iocp.cov_cuts = GLP_ON ;
-	iocp.clq_cuts = GLP_ON ;
+	// iocp.fp_heur = GLP_ON ;
+	// iocp.gmi_cuts = GLP_ON ;
+	// iocp.mir_cuts = GLP_ON ;
+	// iocp.cov_cuts = GLP_ON ;
+	// iocp.clq_cuts = GLP_ON ;
 
 	int status ;
 
