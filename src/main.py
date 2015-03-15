@@ -589,9 +589,9 @@ def sol ( ) :
 	P = problem.P
 	M = problem.M
 
-	lines = fileinput( [ args.mip ] )
+	lines = fileinput.input( [ args.mip ] )
 
-	tokens = parse.tokenize( lines )
+	tokens = parse.removenewlines( lines )
 
 	t = lambda n : parse.take( tokens , n )
 
@@ -601,11 +601,7 @@ def sol ( ) :
 
 	C = len( var )
 
-	t( N )
-
-	t( D )
-
-	t( R )
+	t( 2 * N + D + R )
 
 	LEN = [ t( 1 ) for r in range( R ) ]
 

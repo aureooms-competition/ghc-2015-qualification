@@ -1,5 +1,9 @@
 from src.item import Interval , Server , Affectation , Problem
 
+def removenewlines ( lines ) :
+
+	for line in lines : yield line[:-1]
+
 def tokenize ( lines ) :
 
 	for line in lines :
