@@ -3,8 +3,12 @@ $(VERBOSE).SILENT:
 
 #PROJECT SPECIFIC
 
-INCLUDE_PATH = -Ih
-LIBS = -lglpk
+ROOT =
+
+ifeq ($(INCLUDE_PATH),)
+	INCLUDE_PATH := -Ih
+	LIBS := -lglpk
+endif
 TYPE = run
 
 #DONOTTOUCH
@@ -69,7 +73,7 @@ endif
 ifndef STD
 STD = -std=c++11
 endif
-CXX = $(COMPILER) $(STD) $(INCLUDE_PATH) $(EMBED) $(FLAGS)
+CXX = $(COMPILER) $(STD) $(LIB_PATH) $(INCLUDE_PATH) $(EMBED) $(FLAGS)
 TOOL = $(CXX) -o
 TOOL_OPT = $(LIBS)
 ifeq ($(TYPE),lib)
@@ -123,6 +127,7 @@ endif
 
 $(ROOT)$(TYPE)/%: $(ROOT)$(OUTPUTDIR)/%.o
 	@echo "$(ACTION_COLOR)"linking $@"$(NO_COLOR)"
+	@echo "$(TOOL) $@ $^ $(TOOL_OPT)"
 	$(TOOL) $@ $^ $(TOOL_OPT)
 
 $(ROOT)$(OUTPUTDIR)/%.o: $(ROOT)$(DEPENDENCYDIR)/%.d $(SRC)/%.cpp
