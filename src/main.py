@@ -594,6 +594,7 @@ def sol ( ) :
 	tokens = parse.removenewlines( lines )
 
 	t = lambda n : parse.take( tokens , n )
+	s = lambda n : parse.skip( tokens , n )
 
 	D , N , R , P , LB , UB = t( 6 )
 
@@ -601,13 +602,13 @@ def sol ( ) :
 
 	C = len( var )
 
-	t( 2 * N + D + R )
+	s( 2 * N + D )
 
-	LEN = [ t( 1 ) for r in range( R ) ]
+	LEN = [ next( t( 1 ) ) for r in range( R ) ]
 
-	for r in range( R ) : t( LEN[r] )
+	for r in range( R ) : s( LEN[r] )
 
-	t( var.s( R - 1 , P - 1 ) )
+	s( var.s( R - 1 , P - 1 ) )
 
 	affectations = [ ]
 
@@ -623,7 +624,9 @@ def sol ( ) :
 
 			for p in range( P ) :
 
-				if t( 1 ) :
+				x = next( t( 1 ) )
+
+				if x :
 
 					available -= server.size
 

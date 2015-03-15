@@ -20,6 +20,11 @@ def take ( tokens , n ) :
 		yield int( next( tokens ) )
 
 
+def skip ( tokens , n ) :
+
+	for i in range( n ) : next( tokens )
+
+
 def header ( tokens ) :
 
 	return take( tokens , 5 )
