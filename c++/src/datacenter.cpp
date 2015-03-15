@@ -340,6 +340,14 @@ void problem ( ) {
 				}
 			}
 
+			// if we reach here then server is not used
+
+			for ( int d = 0 ; d < D ; ++d ) {
+				for ( int p = 0 ; p < P ; ++p ) {
+					glp_set_col_bnds( lp , x( d , i , p ) , GLP_FX , 0 , 0 ) ;
+				}
+			}
+
 			servers :;
 
 		}
@@ -370,6 +378,14 @@ void problem ( ) {
 						goto servers2 ;
 
 					}
+				}
+			}
+
+			// if we reach here then server is not used
+
+			for ( int d = 0 ; d < D ; ++d ) {
+				for ( int p = 0 ; p < P ; ++p ) {
+					glp_set_col_bnds( lp , x( d , i , p ) , GLP_FX , 0 , 0 ) ;
 				}
 			}
 
