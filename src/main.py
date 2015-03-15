@@ -541,7 +541,7 @@ def mip ( ) :
 
 		_( objective )
 
-		for g in eval.guaranteed( groups , rows ) :
+		for j , g in eval.guaranteed( groups , rows ) :
 
 			_( g )
 

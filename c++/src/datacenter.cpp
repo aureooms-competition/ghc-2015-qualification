@@ -367,11 +367,29 @@ void in ( ) {
 
 	ifs >> D >> N >> R >> P >> LB >> UB ;
 
+	std::cout << D << " intervals" << std::endl ;
+	std::cout << N << " servers" << std::endl ;
+	std::cout << R << " rows" << std::endl ;
+	std::cout << P << " groups" << std::endl ;
+	std::cout << LB << " LB" << std::endl ;
+	std::cout << UB << " UB" << std::endl ;
+
 	C = columns( ) ;
+
+	std::cout << C << " variables" << std::endl ;
+
+	std::cout << "reading capacities and sizes" << std::endl ;
+
+	v = new int[N] ;
+	w = new int[N] ;
 
 	for ( int i = 0 ; i < N ; ++i ) {
 		ifs >> v[i] >> w[i] ;
 	}
+
+	std::cout << "reading size of knapsacks" << std::endl ;
+
+	W = new int[D] ;
 
 	for ( int d = 0 ; d < D ; ++d ) {
 		ifs >> W[d] ;
@@ -454,10 +472,15 @@ int main ( int argc , char** argv ) {
 	input = argv[1] ;
 	output = argv[2] ;
 
+	std::cout << "reading input" << std::endl ;
 	in( ) ;
+	std::cout << "building problem" << std::endl ;
 	// problem( ) ;
+	std::cout << "solving problem" << std::endl ;
 	// solve( ) ;
+	std::cout << "write output" << std::endl ;
 	out( ) ;
+	std::cout << "clean up" << std::endl ;
 	clean( ) ;
 
 }
