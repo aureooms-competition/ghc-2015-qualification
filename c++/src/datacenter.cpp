@@ -6,7 +6,7 @@
 static const char ON = '1' ;
 static char* input ;
 static char* output ;
-static int D , N , R , P , LB , UB , C ;
+static int D , N , R , P , LB , UB , C , skip ;
 static double* SOL = NULL ;
 static glp_prob* lp = NULL ;
 static int* v = NULL ;
@@ -314,7 +314,19 @@ void refresh ( glp_tree* tree , void* ) {
 
 	if ( glp_ios_reason( tree ) == GLP_IHEUR ) {
 
-		glp_ios_heur_sol( tree , SOL ) ;
+		std::cout << "loading existing solution" << std::endl ;
+
+		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
+
+			std::cout << "existing solution accepted" << std::endl ;
+
+		}
+
+		else {
+
+			std::cout << "existing solution rejected" << std::endl ;
+
+		}
 
 	}
 
@@ -324,7 +336,19 @@ void load ( glp_tree* tree , void* ) {
 
 	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
 
-		glp_ios_heur_sol( tree , SOL ) ;
+		std::cout << "loading existing solution" << std::endl ;
+
+		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
+
+			std::cout << "existing solution accepted" << std::endl ;
+
+		}
+
+		else {
+
+			std::cout << "existing solution rejected" << std::endl ;
+
+		}
 
 	}
 
@@ -404,7 +428,11 @@ void in ( ) {
 
 	std::ifstream ifs ( input , std::ifstream::in ) ;
 
-	ifs >> D >> N >> R >> P >> LB >> UB ;
+	ifs >> D >> N >> R >> P ;
+	ifs >> skip ;
+	if ( LB < 0 ) LB = skip ;
+	ifs >> skip ;
+	if ( UB < 0 ) UB = skip ;
 
 	std::cout << D << " intervals" << std::endl ;
 	std::cout << N << " servers" << std::endl ;
@@ -509,8 +537,8 @@ int flag ( char* arg ) {
 
 int main ( int argc , char** argv ) {
 
-	if ( argc < 10 ) {
-		std::cout << "<input> <output> <fp_heur> <gmi_cuts> <mir_cuts> <cov_cuts> <clq_cuts> <cb_func> <tm_lim>" << std::endl ;
+	if ( argc < 12 ) {
+		std::cout << "<input> <output> <fp_heur> <gmi_cuts> <mir_cuts> <cov_cuts> <clq_cuts> <cb_func> <tm_lim> <LB> <UB>" << std::endl ;
 		exit( -1 ) ;
 	}
 
@@ -524,6 +552,8 @@ int main ( int argc , char** argv ) {
 	clq_cuts = flag( argv[7] ) ;
 	cb_func = argv[8][0] == ON ? refresh : load ;
 	tm_lim = std::stoi( argv[9] ) ;
+	LB = std::stoi( argv[10] ) ;
+	UB = std::stoi( argv[11] ) ;
 
 	std::cout << "<input> " << input << std::endl ;
 	std::cout << "<output> " << output << std::endl ;

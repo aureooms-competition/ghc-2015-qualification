@@ -7,8 +7,6 @@ ROOT =
 
 ifeq ($(INCLUDE_PATH),)
 	INCLUDE_PATH := -Ih
-endif
-ifeq ($(INCLUDE_PATH),)
 	LIBS := -lglpk
 endif
 TYPE = run
