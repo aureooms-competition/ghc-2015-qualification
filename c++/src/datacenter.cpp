@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <limits>
 #include <glpk.h>
 
 static const char ON = '1' ;
@@ -551,7 +552,10 @@ int main ( int argc , char** argv ) {
 	cov_cuts = flag( argv[6] ) ;
 	clq_cuts = flag( argv[7] ) ;
 	cb_func = argv[8][0] == ON ? refresh : load ;
+
 	tm_lim = std::stoi( argv[9] ) ;
+	if ( tm_lim < 0 ) tm_lim = std::numeric_limits<int>::max( ) ;
+
 	LB = std::stoi( argv[10] ) ;
 	UB = std::stoi( argv[11] ) ;
 
