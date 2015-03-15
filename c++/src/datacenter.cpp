@@ -314,6 +314,11 @@ void solve ( ) {
 	glp_init_iocp( &iocp ) ;
 	iocp.presolve = true ;
 	iocp.cb_func = load ;
+	iocp.fp_heur = GLP_ON ;
+	iocp.gmi_cuts = GLP_ON ;
+	iocp.mir_cuts = GLP_ON ;
+	iocp.cov_cuts = GLP_ON ;
+	iocp.clq_cuts = GLP_ON ;
 
 	int status ;
 
