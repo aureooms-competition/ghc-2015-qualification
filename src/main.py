@@ -516,7 +516,7 @@ def mip ( ) :
 
 	with open( args.mip , 'w' ) as f :
 
-		_ = lambda v : f.write( v + "\n" )
+		_ = lambda v : f.write( str( v ) + "\n" )
 
 		_( D )
 		_( N )
@@ -553,10 +553,10 @@ def mip ( ) :
 
 			for p in range( P ) :
 
-				_( rows[r][g] )
+				_( rows[r][p] )
 
 
-		affectations = iter( sorted( affectations , key.affectation ) )
+		affectations = iter( sorted( affectations , key = key.affectation ) )
 
 		affectation = next( affectations , None )
 
