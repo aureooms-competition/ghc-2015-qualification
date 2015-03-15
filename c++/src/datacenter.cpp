@@ -475,9 +475,9 @@ int main ( int argc , char** argv ) {
 	std::cout << "reading input" << std::endl ;
 	in( ) ;
 	std::cout << "building problem" << std::endl ;
-	// problem( ) ;
+	problem( ) ;
 	std::cout << "solving problem" << std::endl ;
-	// solve( ) ;
+	solve( ) ;
 	std::cout << "write output" << std::endl ;
 	out( ) ;
 	std::cout << "clean up" << std::endl ;
