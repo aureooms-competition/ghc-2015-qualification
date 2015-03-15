@@ -335,7 +335,9 @@ def solve ( ) :
 
 	problem.M = len( problem.servers )
 
-	affectations = args.allocator( args , problem , affectations )
+	if args.allocator is not None :
+
+		affectations = args.allocator( args , problem , affectations )
 
 	print( "Servers : %d , Affectations : %d"  % ( problem.M , len( affectations ) ) )
 
