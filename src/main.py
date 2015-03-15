@@ -483,7 +483,7 @@ def mip ( ) :
 
 	additional = ( None , { "problem" : problem } )
 
-	affectations = file.read( solution , parse.affectations , parse.solution , additional = additional )
+	affectations = file.read( args.solution , parse.affectations , parse.solution , additional = additional )
 
 	groups , rows = eval.tableau( R , P , affectations )
 
@@ -631,7 +631,7 @@ def sol ( ) :
 
 					available -= server.size
 
-					affectation.append( Affectation( server , interval , available , p ))
+					affectations.append( Affectation( server , interval , available , p ))
 
 	Z = eval.all( R , P , affectations )
 

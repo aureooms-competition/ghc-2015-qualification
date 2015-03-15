@@ -26,5 +26,5 @@ boot:
 
 zip:
 
-	zip "code.zip" solve validate src/*.py
+	zip "code.zip" sol mip solve validate src/*.py c++/src/*.cpp
 
