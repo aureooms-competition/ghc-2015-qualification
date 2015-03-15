@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <string>
 #include <glpk.h>
 
 static const char ON = '1' ;
@@ -27,6 +28,8 @@ typedef void (*cb)( glp_tree* , void* ) ;
 static cb cb_func = NULL ;
 
 static int tm_lim ;
+static int fix_knapsack ;
+static int fix_partition ;
 
 void clean ( ) {
 
@@ -309,47 +312,78 @@ void problem ( ) {
 
 	}
 
-}
+	if ( fix_knapsack == GLP_ON ) {
 
-void refresh ( glp_tree* tree , void* ) {
+		for ( int i = 0 ; i < N ; ++i ) {
+			for ( int d = 0 ; d < D ; ++d ) {
+				for ( int p = 0 ; p < P ; ++p ) {
 
-	if ( glp_ios_reason( tree ) == GLP_IHEUR ) {
+					int c = x( d , i , p ) ;
 
-		std::cout << "loading existing solution" << std::endl ;
+					if ( SOL[c] ) {
 
-		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
+						for ( int _d = 0 ; _d < D ; ++_d ) {
 
-			std::cout << "existing solution accepted" << std::endl ;
+							if ( _d == d ) continue ;
+
+							for ( int _p = 0 ; _p < P ; ++_p ) {
+
+								glp_set_col_bnds( lp , x( _d , i , _p ) , GLP_FX , 0 , 0 ) ;
+
+							}
+
+						}
+
+						goto servers ;
+
+					}
+				}
+			}
+
+			servers :;
 
 		}
-
-		else {
-
-			std::cout << "existing solution rejected" << std::endl ;
-
-		}
-
 	}
 
+	if ( fix_partition == GLP_ON ) {
+
+		for ( int i = 0 ; i < N ; ++i ) {
+			for ( int d = 0 ; d < D ; ++d ) {
+				for ( int p = 0 ; p < P ; ++p ) {
+
+					int c = x( d , i , p ) ;
+
+					if ( SOL[c] ) {
+
+						for ( int _d = 0 ; _d < D ; ++_d ) {
+
+							for ( int _p = 0 ; _p < P ; ++_p ) {
+
+								if ( _p == p ) continue ;
+
+								glp_set_col_bnds( lp , x( _d , i , _p ) , GLP_FX , 0 , 0 ) ;
+
+							}
+
+						}
+
+						goto servers2 ;
+
+					}
+				}
+			}
+
+			servers2 :;
+
+		}
+	}
 }
 
-void load ( glp_tree* tree , void* ) {
+void solution ( ) {
 
-	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
+	for ( int c = 1 ; c <= C ; ++c ) {
 
-		std::cout << "loading existing solution" << std::endl ;
-
-		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
-
-			std::cout << "existing solution accepted" << std::endl ;
-
-		}
-
-		else {
-
-			std::cout << "existing solution rejected" << std::endl ;
-
-		}
+		SOL[c] = glp_mip_col_val( lp , c ) ;
 
 	}
 
@@ -415,15 +449,6 @@ void solve ( ) {
 
 }
 
-void solution ( ) {
-
-	for ( int c = 1 ; c <= C ; ++c ) {
-
-		SOL[c] = glp_mip_col_val( lp , c ) ;
-
-	}
-
-}
 
 void in ( ) {
 
@@ -494,7 +519,15 @@ void in ( ) {
 
 void out ( ) {
 
-	std::ofstream ofs ( output , std::ofstream::out ) ;
+	const int Z = SOL[1] ;
+
+	const std::string postfix = "-" + std::to_string( Z ) ;
+
+	const std::string name = output + postfix ;
+
+	std::cout << "writing solution with objective value " << Z << " to " << name << std::endl ;
+
+	std::ofstream ofs ( name , std::ofstream::out ) ;
 
 	const char* n = "\n" ;
 
@@ -530,6 +563,63 @@ void out ( ) {
 
 }
 
+void refresh ( glp_tree* tree , void* ) {
+
+	if ( glp_ios_reason( tree ) == GLP_IHEUR ) {
+
+		std::cout << "loading existing solution" << std::endl ;
+
+		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
+
+			std::cout << "existing solution accepted" << std::endl ;
+
+		}
+
+		else {
+
+			std::cout << "existing solution rejected" << std::endl ;
+
+		}
+
+	}
+
+	else if ( glp_ios_reason( tree ) == GLP_IBINGO ) {
+
+		solution( ) ;
+		out( ) ;
+
+	}
+
+}
+
+void load ( glp_tree* tree , void* ) {
+
+	if ( glp_ios_reason( tree ) == GLP_IHEUR && glp_ios_curr_node( tree ) == 1 ) {
+
+		std::cout << "loading existing solution" << std::endl ;
+
+		if ( glp_ios_heur_sol( tree , SOL ) == 0 ) {
+
+			std::cout << "existing solution accepted" << std::endl ;
+
+		}
+
+		else {
+
+			std::cout << "existing solution rejected" << std::endl ;
+
+		}
+
+	}
+
+	else if ( glp_ios_reason( tree ) == GLP_IBINGO ) {
+
+		solution( ) ;
+		out( ) ;
+
+	}
+
+}
 int flag ( char* arg ) {
 
 	return arg[0] == ON ? GLP_ON : GLP_OFF ;
@@ -538,8 +628,20 @@ int flag ( char* arg ) {
 
 int main ( int argc , char** argv ) {
 
-	if ( argc < 12 ) {
-		std::cout << "<input> <output> <fp_heur> <gmi_cuts> <mir_cuts> <cov_cuts> <clq_cuts> <cb_func> <tm_lim> <LB> <UB>" << std::endl ;
+	if ( argc < 14 ) {
+		std::cout << "(01) <input>" << std::endl ;
+		std::cout << "(02) <output>" << std::endl ;
+		std::cout << "(03) <fp_heur>" << std::endl ;
+		std::cout << "(04) <gmi_cuts>" << std::endl ;
+		std::cout << "(05) <mir_cuts>" << std::endl ;
+		std::cout << "(06) <cov_cuts>" << std::endl ;
+		std::cout << "(07) <clq_cuts>" << std::endl ;
+		std::cout << "(08) <cb_func>" << std::endl ;
+		std::cout << "(09) <tm_lim>" << std::endl ;
+		std::cout << "(10) <LB>" << std::endl ;
+		std::cout << "(11) <UB>" << std::endl ;
+		std::cout << "(12) <fix_knapsack>" << std::endl ;
+		std::cout << "(13) <fix_partition>" << std::endl ;
 		exit( -1 ) ;
 	}
 
@@ -558,6 +660,8 @@ int main ( int argc , char** argv ) {
 
 	LB = std::stoi( argv[10] ) ;
 	UB = std::stoi( argv[11] ) ;
+	fix_knapsack = flag( argv[12] ) ;
+	fix_partition = flag( argv[13] ) ;
 
 	std::cout << "<input> " << input << std::endl ;
 	std::cout << "<output> " << output << std::endl ;
@@ -568,6 +672,8 @@ int main ( int argc , char** argv ) {
 	std::cout << "<clq_cuts> " << clq_cuts << std::endl ;
 	std::cout << "<cb_func> " << ( cb_func == load ? "load" : "refresh" ) << std::endl ;
 	std::cout << "<tm_lim> " << tm_lim << std::endl ;
+	std::cout << "<fix_knapsack> " << fix_knapsack << std::endl ;
+	std::cout << "<fix_partition> " << fix_partition << std::endl ;
 
 	std::cout << "reading input" << std::endl ;
 	in( ) ;
