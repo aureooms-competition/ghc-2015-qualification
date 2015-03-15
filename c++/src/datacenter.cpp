@@ -357,7 +357,17 @@ void solve ( ) {
 		exit( status ) ;
 	}
 
-	 std::cout << glp_get_obj_val( lp ) << std::endl ;
+	std::cout << glp_get_obj_val( lp ) << std::endl ;
+
+}
+
+void solution ( ) {
+
+	for ( int c = 1 ; c <= C ; ++c ) {
+
+		SOL[c] = glp_mip_col_val( lp , c ) ;
+
+	}
 
 }
 
@@ -478,6 +488,8 @@ int main ( int argc , char** argv ) {
 	problem( ) ;
 	std::cout << "solving problem" << std::endl ;
 	solve( ) ;
+	std::cout << "extract solution" << std::endl ;
+	solution( ) ;
 	std::cout << "write output" << std::endl ;
 	out( ) ;
 	std::cout << "clean up" << std::endl ;
