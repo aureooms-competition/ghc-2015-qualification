@@ -3,7 +3,7 @@
 #include <fstream>
 #include <glpk.h>
 
-static const char* ON = "1" ;
+static const char ON = '1' ;
 static char* input ;
 static char* output ;
 static int D , N , R , P , LB , UB , C ;
@@ -523,7 +523,7 @@ int main ( int argc , char** argv ) {
 	cov_cuts = flag( argv[6] ) ;
 	clq_cuts = flag( argv[7] ) ;
 	cb_func = argv[8][0] == ON ? refresh : load ;
-	tm_lim = std::stoi( argv[9] )
+	tm_lim = std::stoi( argv[9] ) ;
 
 	std::cout << "<input> " << input << std::endl ;
 	std::cout << "<output> " << output << std::endl ;
@@ -532,7 +532,7 @@ int main ( int argc , char** argv ) {
 	std::cout << "<mir_cuts> " << mir_cuts << std::endl ;
 	std::cout << "<cov_cuts> " << cov_cuts << std::endl ;
 	std::cout << "<clq_cuts> " << clq_cuts << std::endl ;
-	std::cout << "<cb_func> " << cb_func << std::endl ;
+	std::cout << "<cb_func> " << ( cb_func == load ? "load" : "refresh" ) << std::endl ;
 	std::cout << "<tm_lim> " << tm_lim << std::endl ;
 
 	std::cout << "reading input" << std::endl ;
