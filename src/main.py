@@ -635,4 +635,4 @@ def sol ( ) :
 
 	Z = eval.all( R , P , affectations )
 
-	out.write( R , S , P , M , affectations , Z )
+	out.write( R , S , P , M , affectations , Z , copy = args.solution )
