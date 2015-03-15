@@ -45,6 +45,9 @@ void clean ( ) {
 
 	delete[] ROW ;
 
+	glp_delete_index( lp ) ;
+	glp_delete_prob( lp ) ;
+
 }
 
 int Z ( ) {
@@ -76,7 +79,17 @@ void problem ( ) {
 
 	lp = glp_create_prob( ) ;
 
+	glp_create_index( lp ) ;
+
 	glp_add_cols( lp , C ) ;
+
+	for ( int c = 1 ; c <= C ; ++c ) {
+
+		const std::string name = std::to_string( c ) ;
+
+		glp_set_col_name( lp , c , name.data( ) ) ;
+
+	}
 
 	glp_add_rows( lp , ( D + N ) + ( P + R * P ) + ( P + R * P ) ) ;
 
@@ -399,7 +412,11 @@ void solution ( ) {
 
 	for ( int c = 1 ; c <= C ; ++c ) {
 
-		SOL[c] = glp_mip_col_val( lp , c ) ;
+		const std::string name = std::to_string( c ) ;
+
+		const int k = glp_find_col( lp , name.data( ) ) ;
+
+		SOL[c] = glp_mip_col_val( lp , k ) ;
 
 	}
 
@@ -434,7 +451,11 @@ void solve ( ) {
 
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				double val = glp_mip_col_val( lp , x( d , i , p ) ) ;
+				const std::string name = std::to_string( x( d , i , p ) ) ;
+
+				const int k = glp_find_col( lp , name.data( ) ) ;
+
+				double val = glp_mip_col_val( lp , k ) ;
 
 				glp_set_col_bnds( lp , x( d , i , p ) , GLP_FX , val , val ) ;
 
