@@ -45,7 +45,6 @@ void clean ( ) {
 
 	delete[] ROW ;
 
-	glp_delete_index( lp ) ;
 	glp_delete_prob( lp ) ;
 
 }
@@ -79,17 +78,7 @@ void problem ( ) {
 
 	lp = glp_create_prob( ) ;
 
-	glp_create_index( lp ) ;
-
 	glp_add_cols( lp , C ) ;
-
-	for ( int c = 1 ; c <= C ; ++c ) {
-
-		const std::string name = std::to_string( c ) ;
-
-		glp_set_col_name( lp , c , name.data( ) ) ;
-
-	}
 
 	glp_add_rows( lp , ( D + N ) + ( P + R * P ) + ( P + R * P ) ) ;
 
@@ -408,20 +397,25 @@ void problem ( ) {
 	}
 }
 
-void solution ( ) {
+void solutionmip ( ) {
 
 	for ( int c = 1 ; c <= C ; ++c ) {
 
-		const std::string name = std::to_string( c ) ;
-
-		const int k = glp_find_col( lp , name.data( ) ) ;
-
-		SOL[c] = glp_mip_col_val( lp , k ) ;
+		SOL[c] = glp_mip_col_val( lp , c ) ;
 
 	}
 
 }
 
+void solution ( ) {
+
+	for ( int c = 1 ; c <= C ; ++c ) {
+
+		SOL[c] = glp_get_col_prim( lp , c ) ;
+
+	}
+
+}
 
 void solve ( ) {
 
@@ -451,13 +445,11 @@ void solve ( ) {
 
 			for ( int p = 0 ; p < P ; ++p ) {
 
-				const std::string name = std::to_string( x( d , i , p ) ) ;
+				const int c = x( d , i , p ) ;
 
-				const int k = glp_find_col( lp , name.data( ) ) ;
+				double val = SOL[ c ] ;
 
-				double val = glp_mip_col_val( lp , k ) ;
-
-				glp_set_col_bnds( lp , x( d , i , p ) , GLP_FX , val , val ) ;
+				glp_set_col_bnds( lp , c , GLP_FX , val , val ) ;
 
 			}
 		}
@@ -622,7 +614,7 @@ void refresh ( glp_tree* tree , void* ) {
 
 	else if ( glp_ios_reason( tree ) == GLP_IBINGO ) {
 
-		solution( ) ;
+		solutionmip( ) ;
 		out( ) ;
 
 	}
@@ -651,7 +643,7 @@ void load ( glp_tree* tree , void* ) {
 
 	else if ( glp_ios_reason( tree ) == GLP_IBINGO ) {
 
-		solution( ) ;
+		solutionmip( ) ;
 		out( ) ;
 
 	}
