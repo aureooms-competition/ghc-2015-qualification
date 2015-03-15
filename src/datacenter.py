@@ -162,6 +162,8 @@ try :
 
 				tree.ios_heur_sol( { var.x( d , i , p ) : 0 if SRV[i] is None or SRV[i][0] != d or SRV[i][1] != p else 1 for d in range( D ) for i in range( N ) for p in range( P ) } )
 
+		return cb
+
 	def solve ( D , N , R , P , lp , cb = None ) :
 
 		var = Variables( D , N , R , P )
