@@ -589,27 +589,50 @@ def sol ( ) :
 	P = problem.P
 	M = problem.M
 
-	# ...
+	lines = fileinput( [ args.mip ] )
 
-	solution = datacenter.solution( D , N , R , P , lp )
+	tokens = parse.tokenize( lines )
+
+	t = lambda n : parse.take( tokens , n )
+
+	D , N , R , P , LB , UB = t( 6 )
+
+	var = datacenter.Variables( D , N , R , P )
+
+	C = len( var )
+
+	t( N )
+
+	t( D )
+
+	t( R )
+
+	LEN = [ t( 1 ) for r in range( R ) ]
+
+	for r in range( R ) : t( LEN[r] )
+
+	t( var.s( R - 1 , P - 1 ) )
 
 	affectations = [ ]
 
-	for interval in problem.intervals :
+	for d in range( D ) :
+
+		interval = problem.intervals[d]
 
 		available = interval.size
 
-		for server in problem.servers :
+		for i in range( N ) :
 
-			for group in range( P ) :
+			server = problem.servers[i]
 
-				if not next( solution ) : continue
+			for p in range( P ) :
 
-				available -= server.size
+				if t( 1 ) :
 
-				affectation = Affectation( server , interval , available , group )
+					available -= server.size
 
-				affectations.append( affectation )
+					affectation.append( Affectation( server , interval , available , p ))
 
-	return affectations
+	Z = eval.all( R , P , affectations )
 
+	out.write( R , S , P , M , affectations , Z )
