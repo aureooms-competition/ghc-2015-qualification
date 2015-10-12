@@ -5,18 +5,96 @@
 #include <string>
 #include <glpk.h>
 
+/**
+ * Constant used in command line arguments.
+ * '1'  means ON/true/used.
+ */
 static const char ON = '1' ;
+
+/**
+ * Location of the input file.
+ */
 static char* input ;
+
+/**
+ * Prefix for the output filename. The suffix will be '-Z' where Z is the
+ * objective value.
+ */
 static char* output ;
-static int D , N , R , P , LB , UB , C , skip ;
+
+/**
+ * D  - Number of contiguous allocatable regions/chunks (knapsacks).
+ *
+ * An example with D = 2 + 3 = 5
+ *
+ *     |xxx            xx   |
+ *     |  x      x          |
+ *
+ */
+static int D ;
+
+/**
+ * N  - Number of servers.
+ */
+static int N ;
+
+/**
+ * R  - Number of rows.
+ */
+static int R ;
+
+/**
+ * P  - Number of groups.
+ */
+static int P ;
+
+/**
+ * LB - Lower bound on the objective value.
+ */
+static int LB ;
+
+/**
+ * UB - Upper bound on the objective value.
+ */
+static int UB ;
+
+/**
+ * C  - Stores the total number of columns, that is, variables of the integer
+ * program.
+ */
+static int C ;
+
+/**
+ * Variable used to store some symbols of the input file.
+ */
+static int skip ;
+
+/**
+ * A pointer to an array storing a solution/assignment on the variables.
+ */
 static double* SOL = NULL ;
+
+/**
+ * A pointer to a MIP struct.
+ */
 static glp_prob* lp = NULL ;
+
 static int* v = NULL ;
+
+/**
+ * Stores the capacity usage for each server i.
+ */
 static int* w = NULL ;
+
+/**
+ * Stores the capacity for each chunk d.
+ */
 static int* W = NULL ;
+
 static int* LEN = NULL ;
 static int** ROW = NULL ;
 
+// flags forwarded to glpk
 static int fp_heur ;
 static int gmi_cuts ;
 static int mir_cuts ;
@@ -33,7 +111,9 @@ static int fix_partition ;
 
 void clean ( ) {
 
+	// Delete solution array.
 	delete[] SOL ;
+
 	delete[] v ;
 	delete[] w ;
 	delete[] W ;
@@ -45,18 +125,28 @@ void clean ( ) {
 
 	delete[] ROW ;
 
+	// Delete MIP struct.
 	glp_delete_prob( lp ) ;
 
 }
 
+/**
+ * ID of the objective value variable.
+ */
 int Z ( ) {
 	return 1 ;
 }
 
+/**
+ * ID for the p^th ... variable.
+ */
 int g ( int p ) {
 	return ( Z( ) + 1 ) + p ;
 }
 
+/**
+ * ID for the p^th ... variable.
+ */
 int a ( int p ) {
 	return g( P ) + p ;
 }
@@ -65,33 +155,53 @@ int s ( int r , int p ) {
 	return a( P ) + r * P + p ;
 }
 
+/**
+ * ID for variable x_{dip}. x_{dip} = 1 iff server i is put on chunk d and
+ * assigned to group p.
+ */
 int x ( int d , int i , int p ) {
 	return s( R , 0 ) + ( d * N + i ) * P + p ;
 }
 
+/**
+ * Returns the total number of columns, that is, variables of the MIP.
+ */
 int columns ( ) {
 	return x( D - 1 , N - 1 , P - 1 ) ;
 }
 
 
+/**
+ * Creates the MIP.
+ */
 void problem ( ) {
 
+	// This creates a pointer to a glp_prob struct.
 	lp = glp_create_prob( ) ;
 
+	// Add columns (1 per variable).
 	glp_add_cols( lp , C ) ;
 
+	// Add rows (1 per constraint).
 	glp_add_rows( lp , ( D + N ) + ( P + R * P ) + ( P + R * P ) ) ;
 
+	// Set the objective function type to MAXIMIZE.
 	glp_set_obj_dir( lp , GLP_MAX ) ;
 
+	// The objective function is simply Z. We will add constraints to Z later.
 	glp_set_obj_coef( lp , Z( ) , 1 ) ;
 
+	// Add double bound on Z ([LB,UB]).
 	glp_set_col_bnds( lp , Z( ) , GLP_DB , LB , UB ) ;
 
 	for ( int d = 0 ; d < D ; ++d ) {
 		for ( int i = 0 ; i < N ; ++i ) {
 			for ( int p = 0 ; p < P ; ++p ) {
 
+				// For each chunk d, for each server i, for each group p:
+				// set x_{dip} to be a boolean variable,
+				// that is, x_{dip} = 1 iff server i is put on chunk d and
+				// assigned to group p
 				glp_set_col_kind( lp , x( d , i , p ) , GLP_BV ) ;
 
 			}
@@ -99,19 +209,32 @@ void problem ( ) {
 	}
 
 
+	/**
+	 * `k` stores the ID of the row/constraint being filled.
+	 */
 	int k = 1 ;
 
 	for ( int d = 0 ; d < D ; ++d ) {
 
+		// number of variables we will handle
 		int len = N * P ;
+
+		// array for variables ID's
 		int* ind = new int[len+1] ;
+
+		// array for variable coefficient
 		double* val = new double[len+1] ;
 
+		// `j` stores the ID of the variable for the coefficient being set.
 		int j = 1 ;
 
 		for ( int i = 0 ; i < N ; ++i ) {
 			for ( int p = 0 ; p < P ; ++p ) {
 
+				// Given chunk d ,
+				// for each server i, for each group p
+				// if x_{dip} = 1 then we must add w[i]
+				// to the capacity of the chunk usage
 				ind[j] = x( d , i , p ) ;
 				val[j] = w[i] ;
 
@@ -120,13 +243,17 @@ void problem ( ) {
 			}
 		}
 
+		// Add these coefficients to row k.
 		glp_set_mat_row( lp , k , len , ind , val ) ;
 
+		// Free memory.
 		delete[] ind ;
 		delete[] val ;
 
+		// We can not use more than W[d] capacity of chunk d.
 		glp_set_row_bnds( lp , k , GLP_UP , -1 , W[d] ) ;
 
+		// Increment constraint ID.
 		k += 1 ;
 
 	}
