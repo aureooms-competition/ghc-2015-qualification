@@ -92,7 +92,7 @@ except ImportError as e :
 
 	_e = e
 
-	def notify ( *args , **kwargs ) : raise( e )
+	def notify ( *args , **kwargs ) : raise( _e )
 
-	knapsack = solver = solution = notify
+	multidimensional = solve = solution = notify
 
