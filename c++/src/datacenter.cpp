@@ -214,6 +214,8 @@ void problem ( ) {
 	 */
 	int k = 1 ;
 
+	// For a given chunk d we cannot use more
+	// than W[d] capacity.
 	for ( int d = 0 ; d < D ; ++d ) {
 
 		// number of variables we will handle
@@ -258,17 +260,29 @@ void problem ( ) {
 
 	}
 
+	// We cannot use a given server i
+	// more than once.
 	for ( int i = 0 ; i < N ; ++i ) {
 
+		// number of variables we will handle
 		int len = D * P ;
+
+		// array for variables ID's
 		int* ind = new int[len+1] ;
+
+		// array for variable coefficient
 		double* val = new double[len+1] ;
 
+		// `j` stores the ID of the variable for the coefficient being set.
 		int j = 1 ;
 
 		for ( int d = 0 ; d < D ; ++d ) {
 			for ( int p = 0 ; p < P ; ++p ) {
 
+				// Given a server i,
+				// sum_dp x( i , d , p ) <= 1, that is,
+				// a server can only be at one place and
+				// assigned to one group.
 				ind[j] = x( d , i , p ) ;
 				val[j] = 1 ;
 
@@ -277,13 +291,17 @@ void problem ( ) {
 			}
 		}
 
+		// Add these coefficients to row k.
 		glp_set_mat_row( lp , k , len , ind , val ) ;
 
+		// Free memory.
 		delete[] ind ;
 		delete[] val ;
 
+		// We can use a given server at most once.
 		glp_set_row_bnds( lp , k , GLP_UP , -1 , 1 ) ;
 
+		// Increment constraint ID.
 		k += 1 ;
 
 	}
