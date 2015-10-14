@@ -306,10 +306,17 @@ void problem ( ) {
 
 	}
 
+	// A given group p
+	// ...
 	for ( int p = 0 ; p < P ; ++p ) {
 
+		// number of variables we will handle
 		int len = 1 + D * N ;
+
+		// array for variables ID's
 		int* ind = new int[len+1] ;
+
+		// array for variable coefficient
 		double* val = new double[len+1] ;
 
 		int j = 1 ;
@@ -332,6 +339,7 @@ void problem ( ) {
 
 		glp_set_mat_row( lp , k , len , ind , val ) ;
 
+		// Free memory.
 		delete[] ind ;
 		delete[] val ;
 
@@ -339,6 +347,7 @@ void problem ( ) {
 
 		glp_set_col_bnds( lp , a( p ) , GLP_LO , 0 , -1 ) ;
 
+		// Increment constraint ID.
 		k += 1 ;
 
 	}
@@ -460,7 +469,8 @@ void problem ( ) {
 	}
 
 	if ( fix_knapsack == GLP_ON ) {
-
+		// If this flag is on then we fix the variables related to
+		// the server location/knapsack problem.
 		for ( int i = 0 ; i < N ; ++i ) {
 			for ( int d = 0 ; d < D ; ++d ) {
 				for ( int p = 0 ; p < P ; ++p ) {
@@ -501,7 +511,8 @@ void problem ( ) {
 	}
 
 	if ( fix_partition == GLP_ON ) {
-
+		// If this flag is on then we fix the variables related to
+		// the group partitioning/assignment problem.
 		for ( int i = 0 ; i < N ; ++i ) {
 			for ( int d = 0 ; d < D ; ++d ) {
 				for ( int p = 0 ; p < P ; ++p ) {
