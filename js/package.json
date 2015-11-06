@@ -1,0 +1,25 @@
+{
+  "repository": {
+    "url": "https://github.com/aureooms/ghc-2015-qualification.git",
+    "type": "git"
+  },
+  "name": "js",
+  "version": "1.0.0",
+  "description": "ABCD",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "XYZ",
+  "license": "ISC",
+  "dependencies": {
+    "aureooms-es-parse": "^1.0.1",
+    "aureooms-js-array": "^3.1.0",
+    "aureooms-js-compare": "^1.4.5",
+    "aureooms-js-itertools": "^1.3.0",
+    "aureooms-js-metaheuristics": "^1.0.2",
+    "aureooms-js-random": "^1.0.2",
+    "aureooms-js-sort": "^6.0.0",
+    "babel": "^5.8.29"
+  }
+}
